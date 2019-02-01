@@ -4,14 +4,14 @@ from   collections import defaultdict
 import numpy  as np
 import tables as tb
 
-from invisible_cities.database           import load_db             as dbf
-from invisible_cities.reco               import histogram_functions as histf
-from invisible_cities.core               import system_of_units     as units
+from .. database           import load_db             as dbf
+from .. reco               import histogram_functions as histf
+from .. core               import system_of_units     as units
 
-from invisible_cities.evm .histos        import HistoManager
-from invisible_cities.io  .pmaps_io      import load_pmaps
-from invisible_cities.io  .dst_io        import load_dst
-from invisible_cities.reco.tbl_functions import get_rwf_vectors
+from .. evm .histos        import HistoManager
+from .. io  .pmaps_io      import load_pmaps
+from .. io  .dst_io        import load_dst
+from .. reco.tbl_functions import get_rwf_vectors
 
 
 def pmap_bins(config_dict):
@@ -149,7 +149,7 @@ def fill_pmap_var(pmap, sipm_db):
     return var
 
 
-def fill_pmap_histos(in_path, run_number, config_dict):
+def fill_pmap_histos(in_path, detector_db, run_number, config_dict):
     """
     Creates and returns an HistoManager object with the pmap histograms.
 
@@ -160,7 +160,7 @@ def fill_pmap_histos(in_path, run_number, config_dict):
     """
     var_bins, var_labels = pmap_bins(config_dict)
     histo_manager        = histf.create_histomanager_from_dicts(var_bins, var_labels)
-    SiPM_db              = dbf.DataSiPM(run_number)
+    SiPM_db              = dbf.DataSiPM(detector_db, run_number)
 
     for in_file in glob.glob(in_path):
         pmaps = load_pmaps(in_file)
