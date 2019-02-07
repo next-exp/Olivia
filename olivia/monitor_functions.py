@@ -4,49 +4,62 @@ from   collections import defaultdict
 import numpy  as np
 import tables as tb
 
-from .. database           import load_db             as dbf
-from .. reco               import histogram_functions as histf
-from .. core               import system_of_units     as units
+from olivia     import histogram_functions as histf
 
-from .. evm .histos        import HistoManager
-from .. io  .pmaps_io      import load_pmaps
-from .. io  .dst_io        import load_dst
-from .. reco.tbl_functions import get_rwf_vectors
+from olivia.histos       import HistoManager
+
+from invisible_cities.database            import load_db             as dbf
+from invisible_cities. core               import system_of_units     as units
+
+from invisible_cities. io  .pmaps_io      import load_pmaps
+from invisible_cities. io  .dst_io        import load_dst
+from invisible_cities. reco.tbl_functions import get_rwf_vectors
 
 
 def pmap_bins(config_dict):
     """
-    Generates the binning arrays and label of the monitor plots from the a
-    config dictionary that contains the ranges, number of bins and labels.
+    Generates the binning arrays, label and scale of the monitor plots from the
+    config dictionary that contains the ranges, number of bins, labels and scales.
 
-    Returns a dictionary with the bins and another with the labels.
+    Returns a dictionary with the bins, another with the labels and another with
+    the scales.
     """
     var_bins   = {}
     var_labels = {}
+    var_scales = {}
 
     for k, v in config_dict.items():
         if   "_bins"   in k: var_bins  [k.replace("_bins"  , "")] = [np.linspace(v[0], v[1], v[2] + 1)]
         elif "_labels" in k: var_labels[k.replace("_labels", "")] = v
+        elif "_scales" in k: var_scales[k.replace("_scales", "")] = v
 
     exception = ['S1_Energy', 'S1_Number', 'S1_Time']
     bin_sel   = lambda x: ('S2' not in x) and (x not in exception)
     for param in filter(bin_sel, list(var_bins)):
         var_bins  ['S1_Energy_' + param] = var_bins  ['S1_Energy'] + var_bins  [param]
         var_labels['S1_Energy_' + param] = var_labels['S1_Energy'] + var_labels[param]
+        var_scales['S1_Energy_' + param] = var_scales['S1_Energy'] + var_scales[param]
     var_bins      ['S1_Time_S1_Energy']  = var_bins  ['S1_Time'] + var_bins  ['S1_Energy']
     var_labels    ['S1_Time_S1_Energy']  = var_labels['S1_Time'] + var_labels['S1_Energy']
+    var_scales    ['S1_Time_S1_Energy']  = var_scales['S1_Time'] + var_scales['S1_Energy']
 
     exception = ['S2_Energy', 'S2_Number', 'S2_Time']
     bin_sel   = lambda x: ('S1' not in x) and (x not in exception) and ('SiPM' not in x)
     for param in filter(bin_sel, list(var_bins)):
         var_bins  ['S2_Energy_' + param]  = var_bins  ['S2_Energy'] + var_bins  [param]
         var_labels['S2_Energy_' + param]  = var_labels['S2_Energy'] + var_labels[param]
+        var_scales['S2_Energy_' + param]  = var_scales['S2_Energy'] + var_scales[param]
     var_bins      ['S2_Time_S2_Energy']   = var_bins  ['S2_Time']   + var_bins  ['S2_Energy']
     var_labels    ['S2_Time_S2_Energy']   = var_labels['S2_Time']   + var_labels['S2_Energy']
+    var_scales    ['S2_Time_S2_Energy']   = var_scales['S2_Time']   + var_scales['S2_Energy']
+
     var_bins      ['S2_Energy_S1_Energy'] = var_bins  ['S2_Energy'] + var_bins  ['S1_Energy']
     var_labels    ['S2_Energy_S1_Energy'] = var_labels['S2_Energy'] + var_labels['S1_Energy']
+    var_scales    ['S2_Energy_S1_Energy'] = var_scales['S2_Energy'] + var_scales['S1_Energy']
+
     var_bins      ['S2_XYSiPM']           = var_bins  ['S2_XSiPM']  + var_bins  ['S2_YSiPM']
     var_labels    ['S2_XYSiPM']           = var_labels['S2_XSiPM']  + var_labels['S2_YSiPM']
+    var_scales    ['S2_XYSiPM']           = var_scales['S2_XSiPM']  + var_scales['S2_YSiPM']
 
     for i in range(config_dict['nPMT']):
         var_bins  [f'PMT{i}_S2_Energy'] =               var_bins  ['S2_Energy']
@@ -55,11 +68,14 @@ def pmap_bins(config_dict):
         var_labels[f'PMT{i}_S2_Energy'] = [f'PMT{i} ' + var_labels['S2_Energy'][0]]
         var_labels[f'PMT{i}_S2_Height'] = [f'PMT{i} ' + var_labels['S2_Height'][0]]
         var_labels[f'PMT{i}_S2_Time'  ] = [f'PMT{i} ' + var_labels['S2_Time'  ][0]]
+        var_scales[f'PMT{i}_S2_Energy'] =               var_scales['S2_Energy']
+        var_scales[f'PMT{i}_S2_Height'] =               var_scales['S2_Height']
+        var_scales[f'PMT{i}_S2_Time'  ] =               var_scales['S2_Time']
 
     del var_bins['S2_XSiPM']
     del var_bins['S2_YSiPM']
 
-    return var_bins, var_labels
+    return var_bins, var_labels, var_scales
 
 
 def fill_pmap_var_1d(speaks, var_dict, ptype, DataSiPM=None):
@@ -158,8 +174,8 @@ def fill_pmap_histos(in_path, detector_db, run_number, config_dict):
     run_number  = Run number of the dataset (used to obtain the SiPM database).
     config_dict = Dictionary with the configuration parameters (bins, labels).
     """
-    var_bins, var_labels = pmap_bins(config_dict)
-    histo_manager        = histf.create_histomanager_from_dicts(var_bins, var_labels)
+    var_bins, var_labels, var_scales = pmap_bins(config_dict)
+    histo_manager        = histf.create_histomanager_from_dicts(var_bins, var_labels, var_scales)
     SiPM_db              = dbf.DataSiPM(detector_db, run_number)
 
     for in_file in glob.glob(in_path):
@@ -172,19 +188,34 @@ def fill_pmap_histos(in_path, detector_db, run_number, config_dict):
 
 def rwf_bins(config_dict):
     """
-    Generates the binning arrays and label of the rwf monitor plots from the a
-    config dictionary that contains the ranges, number of bins and labels.
+    Generates the binning arrays, label  and scale of the rwf monitor plots from the a
+    config dictionary that contains the ranges, number of bins, labels and scales.
 
-    Returns a dictionary with the bins and another with the labels.
+    Returns a dictionary with the bins, another with the labels and another with
+    the scales.
     """
     var_bins   = {}
     var_labels = {}
+    var_scales = {}
 
     for k, v in config_dict.items():
         if   "_bins"   in k: var_bins  [k.replace("_bins"  , "")] = [np.linspace(v[0], v[1], v[2] + 1)]
         elif "_labels" in k: var_labels[k.replace("_labels", "")] = v
+        elif "_scales" in k: var_scales[k.replace("_scales", "")] = v
 
-    return var_bins, var_labels, config_dict['n_baseline']
+    del var_bins  ["PMTs_AdamPlot"]
+    del var_labels["PMTs_AdamPlot"]
+    del var_scales["PMTs_AdamPlot"]
+
+    n_PMTs = config_dict["n_PMTs"]
+    v      = config_dict["PMTs_AdamPlot_bins"]
+    for i in range(0, int(n_PMTs)):
+        var_bins  [f"PMT{i}_AdamPlot"] = [np.linspace(v[0], v[1], v[2] + 1)]
+        var_labels[f"PMT{i}_AdamPlot"] = [f"PMT{i}_AdamPlot (ADC)"]
+        var_scales[f"PMT{i}_AdamPlot"] = config_dict["PMTs_AdamPlot_scales"]
+
+    return var_bins, var_labels, var_scales, config_dict['n_baseline']
+
 
 def fill_rwf_var(rwf, var_dict, sensor_type):
     """
@@ -202,6 +233,11 @@ def fill_rwf_var(rwf, var_dict, sensor_type):
     var_dict[sensor_type + '_BaselineRMS'].extend(rms)
     var_dict[sensor_type + '_nSensors']   .append(len(bls))
 
+    #ADAM PLOTS
+    if sensor_type is 'PMT':
+        for i in range(0, len(rwf)):
+            var_dict[f'PMT{i}_AdamPlot'].extend(rwf[i])
+
 
 def fill_rwf_histos(in_path, config_dict):
     """
@@ -211,9 +247,9 @@ def fill_rwf_histos(in_path, config_dict):
     in_path     = String with the path to the file(s) to be monitored.
     config_dict = Dictionary with the configuration parameters (bins, labels)
     """
-    var_bins, var_labels, n_baseline = rwf_bins(config_dict)
+    var_bins, var_labels, var_scales, n_baseline = rwf_bins(config_dict)
 
-    histo_manager = histf.create_histomanager_from_dicts(var_bins, var_labels)
+    histo_manager = histf.create_histomanager_from_dicts(var_bins, var_labels, var_scales)
 
     for in_file in glob.glob(in_path):
         with tb.open_file(in_file, "r") as h5in:

@@ -1,16 +1,17 @@
-from .. io   .hist_io        import save_histomanager_to_file
-from .. io   .hist_io        import get_histograms_from_file
-from .. evm  .histos         import Histogram
-from .. evm  .histos         import HistoManager
+from olivia.hist_io        import save_histomanager_to_file
+from olivia.hist_io        import get_histograms_from_file
+from olivia.histos         import Histogram
+from olivia.histos         import HistoManager
 
 
-def create_histomanager_from_dicts(histobins_dict, histolabels_dict, init_fill_dict=None):
+def create_histomanager_from_dicts(histobins_dict, histolabels_dict, histoscales_dict, init_fill_dict=None):
     """
     Creates and returns an HistoManager from a dict of bins and a given of labels with identical keys.
 
     Arguments:
     histobins_dict   = Dictionary with keys equal to Histogram names and values equal to the binning.
     histolabels_dict = Dictionary with keys equal to Histogram names and values equal to the axis labels.
+    histoscales_dict = Dictionary with keys equal to Histogram names and values equal to the y axis scale.
     init_fill_dict   = Dictionary with keys equal to Histogram names and values equal to an initial filling.
     """
     histo_manager = HistoManager()
@@ -19,6 +20,7 @@ def create_histomanager_from_dicts(histobins_dict, histolabels_dict, init_fill_d
         histo_manager.new_histogram(Histogram(histotitle,
                                               histobins,
                                               histolabels_dict[histotitle],
+                                              histoscales_dict[histotitle],
                                               init_fill_dict.get(histotitle, None)))
     return histo_manager
 

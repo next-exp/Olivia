@@ -4,10 +4,10 @@ import tables as tb
 from hypothesis    import settings
 from hypothesis    import given
 
-from .. reco       import tbl_functions as tbl
+from invisible_cities.reco       import tbl_functions as tbl
 
-from .. evm.histos import HistoManager
-from .. evm.histos import Histogram
+from olivia.histos import HistoManager
+from olivia.histos import Histogram
 
 
 def hist_writer(file,
@@ -36,6 +36,7 @@ def hist_writer(file,
 
     return write_hist
 
+
 def hist_writer_var(file, *, compression='ZLIB4'):
 
     def write_hist(group_name  : 'string with folder name to save histograms',
@@ -44,7 +45,8 @@ def hist_writer_var(file, *, compression='ZLIB4'):
                    bins        : 'list of np.array of bins'                  ,
                    out_of_range: 'np.array lenght=2 with events out of range',
                    errors      : 'np.array with bins uncertainties'          ,
-                   labels      : 'list with labels of the histogram'         ):
+                   labels      : 'list with labels of the histogram'         ,
+                   scales      : 'list with the scales of the histogram'      ):
 
         try:                       hist_group = getattr          (file.root, group_name)
         except tb.NoSuchNodeError: hist_group = file.create_group(file.root, group_name)
@@ -61,6 +63,7 @@ def hist_writer_var(file, *, compression='ZLIB4'):
         add_carray       (hist_group, table_name + '_outRange', out_of_range)
         add_carray       (hist_group, table_name + '_errors'  , errors      )
         file.create_array(hist_group, table_name + '_labels'  , labels      )
+        file.create_array(hist_group, table_name + '_scales'  , scales      )
 
     def add_carray(hist_group, table_name, var):
         array_atom  = tb  .Atom.from_dtype(var.dtype)
@@ -91,7 +94,7 @@ def save_histomanager_to_file(histogram_manager, file_out, mode='w', group='HIST
         for histoname, histo in histogram_manager.histos.items():
             writer(group, histoname,
                    histo.data, histo.bins, histo.out_range,
-                   histo.errors, histo.labels)
+                   histo.errors, histo.labels, histo.scale)
 
 
 def get_histograms_from_file(file_input, group_name='HIST'):
@@ -101,7 +104,8 @@ def get_histograms_from_file(file_input, group_name='HIST'):
         selection = (   ('bins'     not in x)
                     and ('labels'   not in x)
                     and ('errors'   not in x)
-                    and ('outRange' not in x))
+                    and ('outRange' not in x)
+                    and ('scales'   not in x))
         return selection
 
     with tb.open_file(file_input, "r") as h5in:
@@ -114,11 +118,17 @@ def get_histograms_from_file(file_input, group_name='HIST'):
             errors    = np.array(getattr(group, histoname + '_errors'  )[:])
             labels    =          getattr(group, histoname + '_labels'  )[:]
             labels    = [str(lab)[2:-1].replace('\\\\', '\\') for lab in labels]
+            try:
+                scale     =          getattr(group, histoname + '_scales'  )[:]
+                scale     = [str(scl)[2:-1].replace('\\\\', '\\') for scl in scale]
+            except tb.NoSuchNodeError:
+                scale     = ["linear"]
 
-            histogram           = Histogram(histoname, bins, labels)
+            histogram           = Histogram(histoname, bins, labels, scale)
             histogram.data      = entries
             histogram.out_range = out_range
             histogram.errors    = errors
+            histogram.scale     = scale
 
             histogram_list.append(histogram)
 

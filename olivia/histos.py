@@ -1,11 +1,11 @@
 import numpy  as np
 import tables as tb
 
-from .. reco  import tbl_functions as tbl
+from invisible_cities.reco  import tbl_functions as tbl
 
 
 class Histogram:
-    def __init__(self, title, bins, labels, values=None):
+    def __init__(self, title, bins, labels, scale, values=None):
         """
         This class represents a histogram with is a parameter holder that
         contains data grouped by bins.
@@ -19,6 +19,7 @@ class Histogram:
                     underflow, second oveflow).
         errors    = Array with the assigned uncertanties to each bin.
         labels    = List with the axis labels.
+        scale     = Scale of the y axis.
 
         Arguments:
         bins   = List containing the histogram binning.
@@ -31,6 +32,7 @@ class Histogram:
         self.errors    = self.init_from_bins()
         self.out_range = np.zeros(shape=(2, len(self.bins)))
         self.labels    = labels
+        self.scale     = scale
 
         if values is not None:
             self.fill(np.asarray(values))
@@ -119,6 +121,7 @@ class Histogram:
         new_histogram.data      =           self.data        + other.data
         new_histogram.out_range =           self.out_range   + other.out_range
         new_histogram.errors    = np.sqrt  (self.errors ** 2 + other.errors ** 2)
+        new_histogram.scale     =           self.scale
         return new_histogram
 
 

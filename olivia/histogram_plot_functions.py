@@ -1,11 +1,12 @@
 import numpy             as np
 import matplotlib.pyplot as plt
 
-from .. io   .hist_io        import get_histograms_from_file
-from .. evm  .histos         import Histogram
-from .. evm  .histos         import HistoManager
-from .. icaro.hst_functions  import shift_to_bin_centers
-from .. core .core_functions import weighted_mean_and_std
+from olivia.hist_io        import get_histograms_from_file
+from olivia.histos         import Histogram
+from olivia.histos         import HistoManager
+
+from invisible_cities.icaro.hst_functions  import shift_to_bin_centers
+from invisible_cities.core .core_functions import weighted_mean_and_std
 
 
 def plot_histograms_from_file(histofile, histonames='all', group_name='HIST', plot_errors=False, out_path=None, reference_histo=None):
@@ -43,6 +44,7 @@ def plot_histogram(histogram, ax=None, plot_errors=False, draw_color='black', st
     out_range   = histogram.out_range
     labels      = histogram.labels
     title       = histogram.title
+    scale       = histogram.scale
     if plot_errors:
         entries = histogram.errors
     else:
@@ -58,6 +60,7 @@ def plot_histogram(histogram, ax=None, plot_errors=False, draw_color='black', st
         ax.grid         (True)
         ax.set_axisbelow(True)
         ax.set_ylabel   ("Entries", weight='bold', fontsize=20)
+        ax.set_yscale   (scale[0])
 
         if stats:
             entries_string   = f'Entries = {np.sum(entries):.0f}\n'
