@@ -9,17 +9,17 @@ from hypothesis.strategies  import lists
 
 from pytest import mark
 
-from .. reco                import histogram_functions as histf
+from olivia import histogram_functions as histf
 
-from .. io .hist_io         import save_histomanager_to_file
-from .. io .hist_io         import get_histograms_from_file
-from .. evm.histos          import HistoManager
-from .. evm.histos          import Histogram
-from .. evm.histos_test     import assert_histogram_equality
-from .. evm.histos_test     import histograms_lists
-from .. evm.histos_test     import bins_arrays
+from olivia.hist_io         import save_histomanager_to_file
+from olivia.hist_io         import get_histograms_from_file
+from olivia.histos          import HistoManager
+from olivia.histos          import Histogram
+from olivia.histos_test     import assert_histogram_equality
+from olivia.histos_test     import histograms_lists
+from olivia.histos_test     import bins_arrays
 
-@mark.skip(reason="Delaying elimination of solid cities")
+# @mark.skip(reason="Delaying elimination of solid cities")
 @given(histograms_lists())
 @settings(deadline=None)
 def test_join_histo_managers(histogram_list):
@@ -30,14 +30,14 @@ def test_join_histo_managers(histogram_list):
     assert len(list_of_histograms) == len(joined_histogram_manager.histos)
     for histoname, histogram in joined_histogram_manager.histos.items():
         histo1 = histogram_manager[histoname]
-        true_histogram           = Histogram(histoname, histo1.bins, histo1.labels)
+        true_histogram           = Histogram(histoname, histo1.bins, histo1.labels, histo1.scale)
         true_histogram.data      = 2 * histo1.data
         true_histogram.errors    = np.sqrt(2) * histo1.errors
         true_histogram.out_range = 2 * histo1.out_range
         assert_histogram_equality(histogram, true_histogram)
 
 
-@mark.skip(reason="Delaying elimination of solid cities")
+# @mark.skip(reason="Delaying elimination of solid cities")
 @given   (histograms_lists(), histograms_lists())
 @settings(deadline=None, max_examples=700)
 def test_join_histo_managers_with_different_histograms(histogram_list1, histogram_list2):
@@ -63,7 +63,7 @@ def test_join_histo_managers_with_different_histograms(histogram_list1, histogra
             histo1 = histogram_manager1[histoname]
             histo2 = histogram_manager2[histoname]
 
-            true_histogram           = Histogram(histoname, histo1.bins, histo1.labels)
+            true_histogram           = Histogram(histoname, histo1.bins, histo1.labels, histo1.scale)
             true_histogram.data      =         histo1.data        + histo2.data
             true_histogram.errors    = np.sqrt(histo1.errors ** 2 + histo2.errors ** 2)
             true_histogram.out_range =         histo1.out_range   + histo2.out_range
@@ -79,28 +79,31 @@ def test_join_histo_managers_with_different_histograms(histogram_list1, histogra
             assert_histogram_equality(histogram, histo2)
 
 
-@mark.skip(reason="Delaying elimination of solid cities")
+# @mark.skip(reason="Delaying elimination of solid cities")
 @given(lists(bins_arrays(), min_size=1, max_size=5))
 @settings(deadline=None)
 def test_create_histomanager_from_dicts(bins):
     histobins_dict   = {}
     histolabels_dict = {}
+    histoscales_dict = {}
     histograms_dict  = {}
     for i, bins_element in enumerate(bins):
         title =    f"Histo_{i}"
         labels = [ f"Xlabel_{i}", f"Ylabel_{i}" ]
+        scales = [ "linear" ]
         histobins_dict  [title] = bins_element
         histolabels_dict[title] = labels
-        histograms_dict [title] = Histogram(title, bins_element, labels)
+        histoscales_dict[title] = scales
+        histograms_dict [title] = Histogram(title, bins_element, labels, scales)
 
-    histo_manager = histf.create_histomanager_from_dicts(histobins_dict, histolabels_dict)
+    histo_manager = histf.create_histomanager_from_dicts(histobins_dict, histolabels_dict, histoscales_dict)
 
     assert len(histograms_dict) == len(histo_manager.histos)
     for histoname, histogram in histo_manager.histos.items():
         assert_histogram_equality(histogram, histograms_dict[histoname])
 
 
-@mark.skip(reason="Delaying elimination of solid cities")
+# @mark.skip(reason="Delaying elimination of solid cities")
 @given   (histograms_lists(), histograms_lists())
 @settings(deadline=None, max_examples=250)
 def test_join_histograms_from_file(output_tmpdir, histogram_list1, histogram_list2):
@@ -122,7 +125,7 @@ def test_join_histograms_from_file(output_tmpdir, histogram_list1, histogram_lis
         assert_histogram_equality(joined_histogram_manager1[histoname], joined_histogram_manager2[histoname])
 
 
-@mark.skip(reason="Delaying elimination of solid cities")
+# @mark.skip(reason="Delaying elimination of solid cities")
 @given   (histograms_lists())
 @settings(deadline=None, max_examples=250)
 def test_join_histograms_from_file_and_write(output_tmpdir, histogram_list):

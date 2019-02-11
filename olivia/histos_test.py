@@ -17,7 +17,7 @@ from hypothesis.strategies  import lists
 from hypothesis.strategies  import sampled_from
 from hypothesis.strategies  import one_of
 
-from .. evm.histos  import HistoManager, Histogram
+from olivia.histos  import HistoManager, Histogram
 
 
 characters = string.ascii_letters + string.digits
@@ -31,6 +31,7 @@ def assert_histogram_equality(histogram1, histogram2):
     assert np.allclose(histogram1.out_range, histogram2.out_range)
     assert             histogram1.title   == histogram2.title
     assert             histogram1.labels  == histogram2.labels
+    assert             histogram1.scale   == histogram2.scale
 
 
 @composite
@@ -67,6 +68,7 @@ def filled_histograms(draw, dimension=0, fixed_bins=None):
         bins = draw(bins_arrays(dimension=dimension))
 
     labels = draw(lists(text(characters, min_size=5), min_size=dimension, max_size=dimension))
+    scales = draw(lists(text(characters, min_size=5), min_size=dimension, max_size=dimension))
     shape  = draw(integers(50, 100)),
     data   = []
     for i in range(dimension):
@@ -75,7 +77,7 @@ def filled_histograms(draw, dimension=0, fixed_bins=None):
         data.append(draw(arrays(float, shape, floats(lower_limit, upper_limit,
                                                      allow_nan=False, allow_infinity=False))))
     data = np.array(data)
-    args = draw(titles()), bins, labels, data
+    args = draw(titles()), bins, labels, scales, data
     return args, Histogram(*args)
 
 
@@ -85,7 +87,8 @@ def empty_histograms(draw, dimension=0):
         dimension = draw(sampled_from((1,2)))
     bins   = draw(bins_arrays(dimension=dimension))
     labels = draw(lists(text(characters, min_size=5), min_size=dimension, max_size=dimension))
-    args   = draw(titles()), bins, labels
+    scales = draw(lists(text(characters, min_size=5), min_size=dimension, max_size=dimension))
+    args   = draw(titles()), bins, labels, scales
     return args, Histogram(*args)
 
 
@@ -102,13 +105,14 @@ def histograms_lists(draw, number=0, dimension=0, fixed_bins=None):
 
     return args, histograms
 
-@mark.skip(reason="Delaying elimination of solid cities")
+# @mark.skip(reason="Delaying elimination of solid cities")
 @given(bins_arrays())
 @settings(deadline=None)
 def test_histogram_initialization(bins):
     label      = [ 'Random distribution' ]
     title      = 'Test_histogram'
-    test_histo = Histogram(title, bins, label)
+    scale      = ['linear']
+    test_histo = Histogram(title, bins, label, scale)
 
     assert np.all     (a == b for a, b in zip(test_histo.bins, bins))
     assert np.allclose(test_histo.data     , np.zeros(shape=tuple(len(x) - 1 for x in bins)))
@@ -116,13 +120,15 @@ def test_histogram_initialization(bins):
     assert np.allclose(test_histo.out_range, np.zeros(shape=(2, len(bins)))                 )
     assert             test_histo.labels  == label
     assert             test_histo.title   == title
+    assert             test_histo.scale   == scale
 
-@mark.skip(reason="Delaying elimination of solid cities")
+# @mark.skip(reason="Delaying elimination of solid cities")
 @given(bins_arrays())
 @settings(deadline=None)
 def test_histogram_initialization_with_values(bins):
     label     = [ 'Random distribution' ]
     title     = 'Test_histogram'
+    scale     = ['linear']
     data      = []
     out_range = []
     for ibin in bins:
@@ -135,7 +141,7 @@ def test_histogram_initialization_with_values(bins):
     data         = np.array(data)
     out_range    = np.array(out_range).T
     binned_data  = np.histogramdd(data.T, bins)[0]
-    test_histo   = Histogram(title, bins, label, data)
+    test_histo   = Histogram(title, bins, label, scale, data)
 
     assert np.all     (a == b for a, b in zip(test_histo.bins, bins))
     assert np.allclose(test_histo.data     , binned_data         )
@@ -143,8 +149,9 @@ def test_histogram_initialization_with_values(bins):
     assert np.allclose(test_histo.errors   , np.sqrt(binned_data))
     assert             test_histo.labels  == label
     assert             test_histo.title   == title
+    assert             test_histo.scale   == scale
 
-@mark.skip(reason="Delaying elimination of solid cities")
+# @mark.skip(reason="Delaying elimination of solid cities")
 @given(empty_histograms())
 @settings(deadline=None)
 def test_histogram_fill(empty_histogram):
@@ -166,7 +173,7 @@ def test_histogram_fill(empty_histogram):
     assert np.allclose(test_histogram.errors   , test_errors      )
     assert np.allclose(test_histogram.out_range, test_out_of_range)
 
-@mark.skip(reason="Delaying elimination of solid cities")
+# @mark.skip(reason="Delaying elimination of solid cities")
 @given(empty_histograms())
 @settings(deadline=None)
 def test_histogram_fill_with_weights(empty_histogram):
@@ -189,36 +196,38 @@ def test_histogram_fill_with_weights(empty_histogram):
     assert np.allclose(test_histogram.errors   , test_errors      )
     assert np.allclose(test_histogram.out_range, test_out_of_range)
 
-@mark.skip(reason="Delaying elimination of solid cities")
+# @mark.skip(reason="Delaying elimination of solid cities")
 def test_bin_data():
     bins           = [ np.linspace(0., 5., 6) ]
     label          = [ 'Random distribution'  ]
+    scale          = [ 'linear' ]
     title          =   'Test_histogram'
     data           = np.array([-1., 2.2, 3.2, 4.5, 6.3, 7.1, 4.9, 3.1, 0.2, 2.1, 2.2, 1.1])
     test_data      = [1, 1, 3, 2, 2]
     test_out_range = [[1], [2]]
 
-    test_histo             = Histogram(title, bins, label)
+    test_histo             = Histogram(title, bins, label, scale)
     binned_data, out_range = test_histo.bin_data(data, data_weights=np.ones(len(data)))
 
     assert np.allclose(binned_data, test_data     )
     assert np.allclose(out_range  , test_out_range)
 
-@mark.skip(reason="Delaying elimination of solid cities")
+# @mark.skip(reason="Delaying elimination of solid cities")
 def test_count_out_of_range():
     bins           = [ np.linspace(0., 5., 6) ]
     label          = [ 'Random distribution'  ]
+    scale          = [ 'linear']
     title          =    'Test_histogram'
     data           = np.array([-1., 2.2, 3.2, 4.5, 6.3, 7.1, 4.9, 3.1, 0.2, 2.1, 2.2, 1.1])
     test_data      = [1, 1, 3, 2, 2]
     test_out_range = [[1], [2]]
 
-    test_histo = Histogram(title, bins, label)
+    test_histo = Histogram(title, bins, label, scale)
     out_range = test_histo.count_out_of_range(np.array(data, ndmin=2))
 
     assert np.allclose(out_range, test_out_range)
 
-@mark.skip(reason="Delaying elimination of solid cities")
+# @mark.skip(reason="Delaying elimination of solid cities")
 @given(filled_histograms())
 @settings(deadline=None)
 def test_update_errors(filled_histogram):
@@ -227,7 +236,7 @@ def test_update_errors(filled_histogram):
     test_histogram.update_errors()
     assert np.allclose(test_histogram.errors, np.sqrt(test_histogram.data))
 
-@mark.skip(reason="Delaying elimination of solid cities")
+# @mark.skip(reason="Delaying elimination of solid cities")
 @given(filled_histograms())
 @settings(deadline=None)
 def test_update_errors_with_values(filled_histogram):
@@ -236,7 +245,7 @@ def test_update_errors_with_values(filled_histogram):
     test_histogram.update_errors(new_errors)
     assert np.allclose(test_histogram.errors, new_errors)
 
-@mark.skip(reason="Delaying elimination of solid cities")
+# @mark.skip(reason="Delaying elimination of solid cities")
 @given(filled_histograms(fixed_bins=[[50, 900, 20]]),
        filled_histograms(fixed_bins=[[50, 900, 20]]))
 @settings(deadline=None)
@@ -252,8 +261,9 @@ def test_add_histograms(first_histogram, second_histogram):
     assert np.allclose(sum_histogram.out_range,         test_histogram1.out_range   + test_histogram2.out_range   )
     assert             sum_histogram.labels  ==         test_histogram1.labels
     assert             sum_histogram.title   ==         test_histogram1.title
+    assert             sum_histogram.scale   ==         test_histogram1.scale
 
-@mark.skip(reason="Delaying elimination of solid cities")
+# @mark.skip(reason="Delaying elimination of solid cities")
 @given(filled_histograms(fixed_bins=[[50, 900, 20]]),
        filled_histograms(fixed_bins=[[50, 900,  5]]))
 @settings(deadline=None)
@@ -264,7 +274,7 @@ def test_add_histograms_with_incompatible_binning_raises_ValueError(first_histog
     with raises(ValueError):
         sum_histogram = test_histogram1 + test_histogram2
 
-@mark.skip(reason="Delaying elimination of solid cities")
+# @mark.skip(reason="Delaying elimination of solid cities")
 @given(filled_histograms(fixed_bins=[[50, 900, 20], [20, 180, 15]]),
        filled_histograms(fixed_bins=[[50, 900, 20], [20, 180, 15]]))
 @settings(deadline=None)
@@ -281,7 +291,7 @@ def test_add_histograms_2d(first_histogram, second_histogram):
     assert             sum_histogram.labels  ==         test_histogram1.labels
     assert             sum_histogram.title   ==         test_histogram1.title
 
-@mark.skip(reason="Delaying elimination of solid cities")
+# @mark.skip(reason="Delaying elimination of solid cities")
 @given   (histograms_lists())
 @settings(deadline=None)
 def test_histomanager_initialization_with_histograms(histogram_list):
@@ -291,12 +301,12 @@ def test_histomanager_initialization_with_histograms(histogram_list):
     for histogram in list_of_histograms:
         assert_histogram_equality(histogram, histogram_manager[histogram.title])
 
-@mark.skip(reason="Delaying elimination of solid cities")
+# @mark.skip(reason="Delaying elimination of solid cities")
 def test_histomanager_initialization_without_histograms():
     histogram_manager = HistoManager()
     assert len(histogram_manager.histos) == 0
 
-@mark.skip(reason="Delaying elimination of solid cities")
+# @mark.skip(reason="Delaying elimination of solid cities")
 @given(one_of(empty_histograms(), filled_histograms()))
 @settings(deadline=None)
 def test_new_histogram_in_histomanager(test_histogram):
@@ -307,7 +317,7 @@ def test_new_histogram_in_histomanager(test_histogram):
 
     assert_histogram_equality(histogram, histogram_manager[histoname])
 
-@mark.skip(reason="Delaying elimination of solid cities")
+# @mark.skip(reason="Delaying elimination of solid cities")
 @given   (histograms_lists())
 @settings(deadline=None)
 def test_fill_histograms_in_histomanager(histogram_list):
@@ -342,7 +352,7 @@ def test_fill_histograms_in_histomanager(histogram_list):
         assert np.allclose(histogram.errors   , np.sqrt(test_data                    + old_data)                  )
         assert np.allclose(histogram.out_range,         test_out_of_range[histoname] + old_out_of_range[histoname])
 
-@mark.skip(reason="Delaying elimination of solid cities")
+# @mark.skip(reason="Delaying elimination of solid cities")
 @given   (histograms_lists())
 @settings(deadline=None)
 def test_getitem_histomanager(histogram_list):
@@ -357,8 +367,9 @@ def test_getitem_histomanager(histogram_list):
         assert np.allclose(histogram_manager.histos[histoname].out_range, histogram_manager[histoname].out_range)
         assert             histogram_manager.histos[histoname].labels  == histogram_manager[histoname].labels
         assert             histogram_manager.histos[histoname].title   == histogram_manager[histoname].title
+        assert             histogram_manager.histos[histoname].scale   == histogram_manager[histoname].scale
 
-@mark.skip(reason="Delaying elimination of solid cities")
+# @mark.skip(reason="Delaying elimination of solid cities")
 @given(histograms_lists())
 @settings(deadline=None)
 def test_setitem_histomanager(histogram_list):
