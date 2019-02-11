@@ -117,7 +117,7 @@ class Histogram:
         if self.labels != other.labels:
             print(f"""Warning: Histogram titles are different.
                       {self.labels}, {other.labels}""")
-        new_histogram           = Histogram(self.title, self.bins, self.labels)
+        new_histogram           = Histogram(self.title, self.bins, self.labels, self.scale)
         new_histogram.data      =           self.data        + other.data
         new_histogram.out_range =           self.out_range   + other.out_range
         new_histogram.errors    = np.sqrt  (self.errors ** 2 + other.errors ** 2)

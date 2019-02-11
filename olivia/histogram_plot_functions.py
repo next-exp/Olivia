@@ -56,7 +56,7 @@ def plot_histogram(histogram, ax=None, plot_errors=False, draw_color='black', st
                         histtype  = 'step',
                         edgecolor = draw_color,
                         linewidth = 1.5,
-                        normed=normed)
+                        density=normed)
         ax.grid         (True)
         ax.set_axisbelow(True)
         ax.set_ylabel   ("Entries", weight='bold', fontsize=20)

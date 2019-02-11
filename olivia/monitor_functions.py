@@ -38,28 +38,29 @@ def pmap_bins(config_dict):
     for param in filter(bin_sel, list(var_bins)):
         var_bins  ['S1_Energy_' + param] = var_bins  ['S1_Energy'] + var_bins  [param]
         var_labels['S1_Energy_' + param] = var_labels['S1_Energy'] + var_labels[param]
-        var_scales['S1_Energy_' + param] = var_scales['S1_Energy'] + var_scales[param]
+        var_scales['S1_Energy_' + param] = var_scales['S1_Energy']
     var_bins      ['S1_Time_S1_Energy']  = var_bins  ['S1_Time'] + var_bins  ['S1_Energy']
     var_labels    ['S1_Time_S1_Energy']  = var_labels['S1_Time'] + var_labels['S1_Energy']
-    var_scales    ['S1_Time_S1_Energy']  = var_scales['S1_Time'] + var_scales['S1_Energy']
+    var_scales    ['S1_Time_S1_Energy']  = var_scales['S1_Time']
 
     exception = ['S2_Energy', 'S2_Number', 'S2_Time']
     bin_sel   = lambda x: ('S1' not in x) and (x not in exception) and ('SiPM' not in x)
     for param in filter(bin_sel, list(var_bins)):
         var_bins  ['S2_Energy_' + param]  = var_bins  ['S2_Energy'] + var_bins  [param]
         var_labels['S2_Energy_' + param]  = var_labels['S2_Energy'] + var_labels[param]
-        var_scales['S2_Energy_' + param]  = var_scales['S2_Energy'] + var_scales[param]
+        var_scales['S2_Energy_' + param]  = var_scales['S2_Energy']
+
     var_bins      ['S2_Time_S2_Energy']   = var_bins  ['S2_Time']   + var_bins  ['S2_Energy']
     var_labels    ['S2_Time_S2_Energy']   = var_labels['S2_Time']   + var_labels['S2_Energy']
-    var_scales    ['S2_Time_S2_Energy']   = var_scales['S2_Time']   + var_scales['S2_Energy']
+    var_scales    ['S2_Time_S2_Energy']   = var_scales['S2_Time']
 
     var_bins      ['S2_Energy_S1_Energy'] = var_bins  ['S2_Energy'] + var_bins  ['S1_Energy']
     var_labels    ['S2_Energy_S1_Energy'] = var_labels['S2_Energy'] + var_labels['S1_Energy']
-    var_scales    ['S2_Energy_S1_Energy'] = var_scales['S2_Energy'] + var_scales['S1_Energy']
+    var_scales    ['S2_Energy_S1_Energy'] = var_scales['S2_Energy']
 
     var_bins      ['S2_XYSiPM']           = var_bins  ['S2_XSiPM']  + var_bins  ['S2_YSiPM']
     var_labels    ['S2_XYSiPM']           = var_labels['S2_XSiPM']  + var_labels['S2_YSiPM']
-    var_scales    ['S2_XYSiPM']           = var_scales['S2_XSiPM']  + var_scales['S2_YSiPM']
+    var_scales    ['S2_XYSiPM']           = var_scales['S2_XSiPM']
 
     for i in range(config_dict['nPMT']):
         var_bins  [f'PMT{i}_S2_Energy'] =               var_bins  ['S2_Energy']
