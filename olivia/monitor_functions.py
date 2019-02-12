@@ -15,6 +15,8 @@ from invisible_cities. io  .pmaps_io      import load_pmaps
 from invisible_cities. io  .dst_io        import load_dst
 from invisible_cities. reco.tbl_functions import get_rwf_vectors
 
+from invisible_cities. reco.calib_sensors_functions import modes
+
 
 def pmap_bins(config_dict):
     """
@@ -228,8 +230,12 @@ def fill_rwf_var(rwf, var_dict, sensor_type):
     sensor_type    = Type of sensor('PMT' or 'SiPM')
     """
 
-    bls = np.mean(rwf, axis=1)
+    if   sensor_type == "SiPM":
+        bls = modes(rwf.astype("int16")).flatten()
+    elif sensor_type == "PMT":
+        bls = np.mean(rwf, axis=1)
     rms = np.std (rwf, axis=1)
+
     var_dict[sensor_type + '_Baseline']   .extend(bls)
     var_dict[sensor_type + '_BaselineRMS'].extend(rms)
     var_dict[sensor_type + '_nSensors']   .append(len(bls))

@@ -17,6 +17,8 @@ from invisible_cities. core                 import system_of_units     as units
 from invisible_cities.evm.pmaps_test       import pmaps
 from invisible_cities.evm.pmaps_test       import sensor_responses
 
+from invisible_cities.reco.calib_sensors_functions import modes
+
 
 @given(pmaps())
 @settings(deadline=None)
@@ -291,7 +293,7 @@ def test_fill_rwf_var():
 
     assert np.allclose(var_dict['PMT_Baseline']    , np.mean( pmt_waveforms, axis=1))
     assert np.allclose(var_dict['PMT_BaselineRMS'] , np.std ( pmt_waveforms, axis=1))
-    assert np.allclose(var_dict['SiPM_Baseline']   , np.mean(sipm_waveforms, axis=1))
+    assert np.allclose(var_dict['SiPM_Baseline']   , modes  (sipm_waveforms.astype("int16")).flatten())
     assert np.allclose(var_dict['SiPM_BaselineRMS'], np.std (sipm_waveforms, axis=1))
 
 
