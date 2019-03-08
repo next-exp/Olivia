@@ -406,6 +406,12 @@ def test_fill_rwf_histos(ICDATADIR):
     # assert set(check_histo.histos) ==  set(test_histo.histos)
 
     for k, v in check_histo.histos.items():
+
+        print(k)
+        print()
+        print('check_data', v.data)
+        print('test_data', test_histo.histos[k].data)
+
         assert np.allclose(v.data     , test_histo.histos[k].data     )
         assert np.allclose(v.out_range, test_histo.histos[k].out_range)
         assert np.allclose(v.errors   , test_histo.histos[k].errors   )

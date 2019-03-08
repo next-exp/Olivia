@@ -202,13 +202,15 @@ def rwf_bins(config_dict):
     var_scales = {}
 
     for k, v in config_dict.items():
+        if "PMTs_AdamPlot" in k: continue
+        
         if   "_bins"   in k: var_bins  [k.replace("_bins"  , "")] = [np.linspace(v[0], v[1], v[2] + 1)]
         elif "_labels" in k: var_labels[k.replace("_labels", "")] = v
         elif "_scales" in k: var_scales[k.replace("_scales", "")] = v
 
-    del var_bins  ["PMTs_AdamPlot"]
-    del var_labels["PMTs_AdamPlot"]
-    del var_scales["PMTs_AdamPlot"]
+    # del var_bins  ["PMTs_AdamPlot"]
+    # del var_labels["PMTs_AdamPlot"]
+    # del var_scales["PMTs_AdamPlot"]
 
     n_PMTs = config_dict["n_PMTs"]
     v      = config_dict["PMTs_AdamPlot_bins"]
