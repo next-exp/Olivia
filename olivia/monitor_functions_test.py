@@ -305,7 +305,7 @@ def test_rwf_bins():
                  'SIPM_Baseline_bins'      : [   0,  100, 100],
                  'SIPM_BaselineRMS_bins'   : [   0,   10, 100],
                  'SIPM_nSensors_bins'      : [-0.5,   12, 100],
-                 'PMTs_AdamPlot_bins'      : [0   , 4096, 4096],
+                 'Raw_ADC_counts_bins'     : [0   , 4096, 4096],
 
 
                  'PMT_Baseline_labels'     : ["ADCs"]           ,
@@ -314,7 +314,7 @@ def test_rwf_bins():
                  'SIPM_Baseline_labels'    : ["ADCs"]           ,
                  'SIPM_BaselineRMS_labels' : ["ADCs"]           ,
                  'SIPM_nSensors_labels'    : ["Number of SIPMs"],
-                 'PMTs_AdamPlot_labels'    : [""],
+                 'Raw_ADC_counts_labels'   : [""]               ,
 
                  'PMT_Baseline_scales'     : [ "linear" ]       ,
                  'PMT_BaselineRMS_scales'  : [ "linear" ]       ,
@@ -322,7 +322,7 @@ def test_rwf_bins():
                  'SIPM_Baseline_scales'    : [ "linear" ]       ,
                  'SIPM_BaselineRMS_scales' : [ "linear" ]       ,
                  'SIPM_nSensors_scales'    : [ "linear" ]       ,
-                 'PMTs_AdamPlot_scales'    : [ "log"    ]       ,
+                 'Raw_ADC_counts_scales'   : [ "log"    ]       ,
 
                  'n_PMTs'                  : 12,
                  'n_baseline'              : 10000 }
@@ -341,9 +341,9 @@ def test_rwf_bins():
     assert     np.allclose(out_bins['SIPM_BaselineRMS'], [np.linspace(bins[0], bins[1], bins[2] + 1)])
     bins = test_dict['SIPM_nSensors_bins']
     assert     np.allclose(out_bins['SIPM_nSensors']   , [np.linspace(bins[0], bins[1], bins[2] + 1)])
-    bins = test_dict['PMTs_AdamPlot_bins']
+    bins = test_dict['Raw_ADC_counts_bins']
     for i in range(0, int(test_dict['n_PMTs'])):
-        assert np.allclose(out_bins[f'PMT{i}_AdamPlot'], [np.linspace(bins[0], bins[1], bins[2] + 1)])
+        assert np.allclose(out_bins[f'PMT{i}_ADCs'], [np.linspace(bins[0], bins[1], bins[2] + 1)])
 
     assert     out_labels['PMT_Baseline']    [0] == test_dict['PMT_Baseline_labels']    [0]
     assert     out_labels['PMT_BaselineRMS'] [0] == test_dict['PMT_BaselineRMS_labels'] [0]
@@ -352,7 +352,7 @@ def test_rwf_bins():
     assert     out_labels['SIPM_BaselineRMS'][0] == test_dict['SIPM_BaselineRMS_labels'][0]
     assert     out_labels['SIPM_nSensors']   [0] == test_dict['SIPM_nSensors_labels']   [0]
     for i in range(0, int(test_dict['n_PMTs'])):
-        assert out_labels[f'PMT{i}_AdamPlot'][0] == f"PMT{i}_AdamPlot (ADC)"
+        assert out_labels[f'PMT{i}_ADCs'][0] == f"PMT{i}_Raw_ADC_counts"
 
     assert     out_scales['PMT_Baseline']    [0] == test_dict['PMT_Baseline_scales']    [0]
     assert     out_scales['PMT_BaselineRMS'] [0] == test_dict['PMT_BaselineRMS_scales'] [0]
@@ -361,7 +361,7 @@ def test_rwf_bins():
     assert     out_scales['SIPM_BaselineRMS'][0] == test_dict['SIPM_BaselineRMS_scales'][0]
     assert     out_scales['SIPM_nSensors']   [0] == test_dict['SIPM_nSensors_scales']   [0]
     for i in range(0, int(test_dict['n_PMTs'])):
-        assert out_scales[f'PMT{i}_AdamPlot'][0] == test_dict['PMTs_AdamPlot_scales'][0]
+        assert out_scales[f'PMT{i}_ADCs'][0] == test_dict['Raw_ADC_counts_scales'][0]
 
     assert out_baseline                      == test_dict['n_baseline']
 
@@ -373,7 +373,7 @@ def test_fill_rwf_histos(OLIVIADATADIR):
                         'SIPM_Baseline_bins'      : [     0,    100,  100],
                         'SIPM_BaselineRMS_bins'   : [     0,     10,  100],
                         'SIPM_nSensors_bins'      : [1750.5, 1800.5,   50],
-                        'PMTs_AdamPlot_bins'      : [0   , 4096, 4096]    ,
+                        'Raw_ADC_counts_bins'     : [0   , 4096, 4096]    ,
 
                         'PMT_Baseline_labels'     : ["PMT Baseline (ADC)"]     ,
                         'PMT_BaselineRMS_labels'  : ["PMT Baseline RMS (ADC)"] ,
@@ -381,7 +381,7 @@ def test_fill_rwf_histos(OLIVIADATADIR):
                         'SIPM_Baseline_labels'    : ["SIPM Baseline (ADC)"]    ,
                         'SIPM_BaselineRMS_labels' : ["SIPM Baseline RMS (ADC)"],
                         'SIPM_nSensors_labels'    : ["Number of SIPMs"]        ,
-                        'PMTs_AdamPlot_labels'    : [""]                       ,
+                        'Raw_ADC_counts_labels'   : [""]                       ,
 
                         'PMT_Baseline_scales'     : [ "linear" ]       ,
                         'PMT_BaselineRMS_scales'  : [ "linear" ]       ,
@@ -389,7 +389,7 @@ def test_fill_rwf_histos(OLIVIADATADIR):
                         'SIPM_Baseline_scales'    : [ "linear" ]       ,
                         'SIPM_BaselineRMS_scales' : [ "linear" ]       ,
                         'SIPM_nSensors_scales'    : [ "linear" ]       ,
-                        'PMTs_AdamPlot_scales'    : [ "log"    ]       ,
+                        'Raw_ADC_counts_scales'   : [ "log"    ]       ,
 
                         'n_PMTs'                  : 12,
                         'n_baseline'              : 48000}
@@ -407,12 +407,6 @@ def test_fill_rwf_histos(OLIVIADATADIR):
     # assert set(check_histo.histos) ==  set(test_histo.histos)
 
     for k, v in check_histo.histos.items():
-
-        print(k)
-        print()
-        print('check_data', v.data)
-        print('test_data', test_histo.histos[k].data)
-
         assert np.allclose(v.data     , test_histo.histos[k].data     )
         assert np.allclose(v.out_range, test_histo.histos[k].out_range)
         assert np.allclose(v.errors   , test_histo.histos[k].errors   )

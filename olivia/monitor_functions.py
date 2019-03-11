@@ -203,22 +203,18 @@ def rwf_bins(config_dict):
     var_scales = {}
 
     for k, v in config_dict.items():
-        if "PMTs_AdamPlot" in k: continue
+        if "Raw_ADC_counts" in k: continue
 
         if   "_bins"   in k: var_bins  [k.replace("_bins"  , "")] = [np.linspace(v[0], v[1], v[2] + 1)]
         elif "_labels" in k: var_labels[k.replace("_labels", "")] = v
         elif "_scales" in k: var_scales[k.replace("_scales", "")] = v
 
-    # del var_bins  ["PMTs_AdamPlot"]
-    # del var_labels["PMTs_AdamPlot"]
-    # del var_scales["PMTs_AdamPlot"]
-
     n_PMTs = config_dict["n_PMTs"]
-    v      = config_dict["PMTs_AdamPlot_bins"]
+    v      = config_dict["Raw_ADC_counts_bins"]
     for i in range(0, int(n_PMTs)):
-        var_bins  [f"PMT{i}_AdamPlot"] = [np.linspace(v[0], v[1], v[2] + 1)]
-        var_labels[f"PMT{i}_AdamPlot"] = [f"PMT{i}_AdamPlot (ADC)"]
-        var_scales[f"PMT{i}_AdamPlot"] = config_dict["PMTs_AdamPlot_scales"]
+        var_bins  [f"PMT{i}_ADCs"] = [np.linspace(v[0], v[1], v[2] + 1)]
+        var_labels[f"PMT{i}_ADCs"] = [f"PMT{i}_Raw_ADC_counts"]
+        var_scales[f"PMT{i}_ADCs"] = config_dict["Raw_ADC_counts_scales"]
 
     return var_bins, var_labels, var_scales, config_dict['n_baseline']
 
@@ -246,7 +242,7 @@ def fill_rwf_var(rwf, var_dict, sensor_type):
     #ADAM PLOTS
     if sensor_type is SensorType.PMT:
         for i in range(0, len(rwf)):
-            var_dict[f'PMT{i}_AdamPlot'].extend(rwf[i])
+            var_dict[f'PMT{i}_ADCs'].extend(rwf[i])
 
 
 def fill_rwf_histos(in_path, config_dict):
