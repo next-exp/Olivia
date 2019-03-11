@@ -18,6 +18,7 @@ from invisible_cities.evm.pmaps_test       import pmaps
 from invisible_cities.evm.pmaps_test       import sensor_responses
 
 from invisible_cities.reco.calib_sensors_functions import modes
+from invisible_cities.reco.calib_functions         import SensorType
 
 
 @given(pmaps())
@@ -197,7 +198,7 @@ def test_pmap_bins():
         assert k in variable_names
 
 
-def test_fill_pmap_histos(dbnew, ICDATADIR):
+def test_fill_pmap_histos(dbnew, OLIVIADATADIR):
     test_config_dict = {'S1_Number_bins'   : [-0.50,   10.50,   11],
                         'S1_Width_bins'    : [-0.01,    0.99,   40],
                         'S1_Height_bins'   : [    0,      10,   10],
@@ -261,14 +262,14 @@ def test_fill_pmap_histos(dbnew, ICDATADIR):
                         'nPMT'             : 12}
 
     test_infile = "Kr_pmaps_run4628.h5"
-    test_infile = os.path.join(ICDATADIR, test_infile)
+    test_infile = os.path.join(OLIVIADATADIR, test_infile)
 
     run_number = 4628
 
     test_histo = monf.fill_pmap_histos(test_infile, dbnew, run_number, test_config_dict)
 
     test_checkfile = "Kr_pmaps_histos_run4628.h5"
-    test_checkfile = os.path.join(ICDATADIR, test_checkfile)
+    test_checkfile = os.path.join(OLIVIADATADIR, test_checkfile)
     check_histo    = histf.get_histograms_from_file(test_checkfile)
 
     assert set(check_histo.histos) ==  set(test_histo.histos)
@@ -288,39 +289,39 @@ def test_fill_rwf_var():
     var_dict = defaultdict(list)
     pmt_waveforms  = np.random.uniform(0, 10, size=(  12, 10000))
     sipm_waveforms = np.random.uniform(0, 10, size=(1792, 10000))
-    monf.fill_rwf_var( pmt_waveforms, var_dict, "PMT" )
-    monf.fill_rwf_var(sipm_waveforms, var_dict, "SiPM")
+    monf.fill_rwf_var( pmt_waveforms, var_dict, SensorType.PMT )
+    monf.fill_rwf_var(sipm_waveforms, var_dict, SensorType.SIPM)
 
     assert np.allclose(var_dict['PMT_Baseline']    , np.mean( pmt_waveforms, axis=1))
     assert np.allclose(var_dict['PMT_BaselineRMS'] , np.std ( pmt_waveforms, axis=1))
-    assert np.allclose(var_dict['SiPM_Baseline']   , modes  (sipm_waveforms.astype("int16")).flatten())
-    assert np.allclose(var_dict['SiPM_BaselineRMS'], np.std (sipm_waveforms, axis=1))
+    assert np.allclose(var_dict['SIPM_Baseline']   , modes  (sipm_waveforms.astype("int16")).flatten())
+    assert np.allclose(var_dict['SIPM_BaselineRMS'], np.std (sipm_waveforms, axis=1))
 
 
 def test_rwf_bins():
     test_dict = {'PMT_Baseline_bins'       : [2300, 2700, 400],
                  'PMT_BaselineRMS_bins'    : [   0,   10, 100],
                  'PMT_nSensors_bins'       : [-0.5,   12, 100],
-                 'SiPM_Baseline_bins'      : [   0,  100, 100],
-                 'SiPM_BaselineRMS_bins'   : [   0,   10, 100],
-                 'SiPM_nSensors_bins'      : [-0.5,   12, 100],
+                 'SIPM_Baseline_bins'      : [   0,  100, 100],
+                 'SIPM_BaselineRMS_bins'   : [   0,   10, 100],
+                 'SIPM_nSensors_bins'      : [-0.5,   12, 100],
                  'PMTs_AdamPlot_bins'      : [0   , 4096, 4096],
 
 
                  'PMT_Baseline_labels'     : ["ADCs"]           ,
                  'PMT_BaselineRMS_labels'  : ["ADCs"]           ,
                  'PMT_nSensors_labels'     : ["Number of PMTs"] ,
-                 'SiPM_Baseline_labels'    : ["ADCs"]           ,
-                 'SiPM_BaselineRMS_labels' : ["ADCs"]           ,
-                 'SiPM_nSensors_labels'    : ["Number of SiPMs"],
+                 'SIPM_Baseline_labels'    : ["ADCs"]           ,
+                 'SIPM_BaselineRMS_labels' : ["ADCs"]           ,
+                 'SIPM_nSensors_labels'    : ["Number of SIPMs"],
                  'PMTs_AdamPlot_labels'    : [""],
 
                  'PMT_Baseline_scales'     : [ "linear" ]       ,
                  'PMT_BaselineRMS_scales'  : [ "linear" ]       ,
                  'PMT_nSensors_scales'     : [ "linear" ]       ,
-                 'SiPM_Baseline_scales'    : [ "linear" ]       ,
-                 'SiPM_BaselineRMS_scales' : [ "linear" ]       ,
-                 'SiPM_nSensors_scales'    : [ "linear" ]       ,
+                 'SIPM_Baseline_scales'    : [ "linear" ]       ,
+                 'SIPM_BaselineRMS_scales' : [ "linear" ]       ,
+                 'SIPM_nSensors_scales'    : [ "linear" ]       ,
                  'PMTs_AdamPlot_scales'    : [ "log"    ]       ,
 
                  'n_PMTs'                  : 12,
@@ -334,12 +335,12 @@ def test_rwf_bins():
     assert     np.allclose(out_bins['PMT_BaselineRMS'] , [np.linspace(bins[0], bins[1], bins[2] + 1)])
     bins = test_dict['PMT_nSensors_bins']
     assert     np.allclose(out_bins['PMT_nSensors']    , [np.linspace(bins[0], bins[1], bins[2] + 1)])
-    bins = test_dict['SiPM_Baseline_bins']
-    assert     np.allclose(out_bins['SiPM_Baseline']   , [np.linspace(bins[0], bins[1], bins[2] + 1)])
-    bins = test_dict['SiPM_BaselineRMS_bins']
-    assert     np.allclose(out_bins['SiPM_BaselineRMS'], [np.linspace(bins[0], bins[1], bins[2] + 1)])
-    bins = test_dict['SiPM_nSensors_bins']
-    assert     np.allclose(out_bins['SiPM_nSensors']   , [np.linspace(bins[0], bins[1], bins[2] + 1)])
+    bins = test_dict['SIPM_Baseline_bins']
+    assert     np.allclose(out_bins['SIPM_Baseline']   , [np.linspace(bins[0], bins[1], bins[2] + 1)])
+    bins = test_dict['SIPM_BaselineRMS_bins']
+    assert     np.allclose(out_bins['SIPM_BaselineRMS'], [np.linspace(bins[0], bins[1], bins[2] + 1)])
+    bins = test_dict['SIPM_nSensors_bins']
+    assert     np.allclose(out_bins['SIPM_nSensors']   , [np.linspace(bins[0], bins[1], bins[2] + 1)])
     bins = test_dict['PMTs_AdamPlot_bins']
     for i in range(0, int(test_dict['n_PMTs'])):
         assert np.allclose(out_bins[f'PMT{i}_AdamPlot'], [np.linspace(bins[0], bins[1], bins[2] + 1)])
@@ -347,59 +348,59 @@ def test_rwf_bins():
     assert     out_labels['PMT_Baseline']    [0] == test_dict['PMT_Baseline_labels']    [0]
     assert     out_labels['PMT_BaselineRMS'] [0] == test_dict['PMT_BaselineRMS_labels'] [0]
     assert     out_labels['PMT_nSensors']    [0] == test_dict['PMT_nSensors_labels']    [0]
-    assert     out_labels['SiPM_Baseline']   [0] == test_dict['SiPM_Baseline_labels']   [0]
-    assert     out_labels['SiPM_BaselineRMS'][0] == test_dict['SiPM_BaselineRMS_labels'][0]
-    assert     out_labels['SiPM_nSensors']   [0] == test_dict['SiPM_nSensors_labels']   [0]
+    assert     out_labels['SIPM_Baseline']   [0] == test_dict['SIPM_Baseline_labels']   [0]
+    assert     out_labels['SIPM_BaselineRMS'][0] == test_dict['SIPM_BaselineRMS_labels'][0]
+    assert     out_labels['SIPM_nSensors']   [0] == test_dict['SIPM_nSensors_labels']   [0]
     for i in range(0, int(test_dict['n_PMTs'])):
         assert out_labels[f'PMT{i}_AdamPlot'][0] == f"PMT{i}_AdamPlot (ADC)"
 
     assert     out_scales['PMT_Baseline']    [0] == test_dict['PMT_Baseline_scales']    [0]
     assert     out_scales['PMT_BaselineRMS'] [0] == test_dict['PMT_BaselineRMS_scales'] [0]
     assert     out_scales['PMT_nSensors']    [0] == test_dict['PMT_nSensors_scales']    [0]
-    assert     out_scales['SiPM_Baseline']   [0] == test_dict['SiPM_Baseline_scales']   [0]
-    assert     out_scales['SiPM_BaselineRMS'][0] == test_dict['SiPM_BaselineRMS_scales'][0]
-    assert     out_scales['SiPM_nSensors']   [0] == test_dict['SiPM_nSensors_scales']   [0]
+    assert     out_scales['SIPM_Baseline']   [0] == test_dict['SIPM_Baseline_scales']   [0]
+    assert     out_scales['SIPM_BaselineRMS'][0] == test_dict['SIPM_BaselineRMS_scales'][0]
+    assert     out_scales['SIPM_nSensors']   [0] == test_dict['SIPM_nSensors_scales']   [0]
     for i in range(0, int(test_dict['n_PMTs'])):
         assert out_scales[f'PMT{i}_AdamPlot'][0] == test_dict['PMTs_AdamPlot_scales'][0]
 
     assert out_baseline                      == test_dict['n_baseline']
 
 
-def test_fill_rwf_histos(ICDATADIR):
+def test_fill_rwf_histos(OLIVIADATADIR):
     test_config_dict = {'PMT_Baseline_bins'       : [  2300,   2700,  400],
                         'PMT_BaselineRMS_bins'    : [     0,     10,  100],
                         'PMT_nSensors_bins'       : [  -0.5,   12.5,   13],
-                        'SiPM_Baseline_bins'      : [     0,    100,  100],
-                        'SiPM_BaselineRMS_bins'   : [     0,     10,  100],
-                        'SiPM_nSensors_bins'      : [1750.5, 1800.5,   50],
+                        'SIPM_Baseline_bins'      : [     0,    100,  100],
+                        'SIPM_BaselineRMS_bins'   : [     0,     10,  100],
+                        'SIPM_nSensors_bins'      : [1750.5, 1800.5,   50],
                         'PMTs_AdamPlot_bins'      : [0   , 4096, 4096]    ,
 
                         'PMT_Baseline_labels'     : ["PMT Baseline (ADC)"]     ,
                         'PMT_BaselineRMS_labels'  : ["PMT Baseline RMS (ADC)"] ,
                         'PMT_nSensors_labels'     : ["Number of PMTs"]         ,
-                        'SiPM_Baseline_labels'    : ["SiPM Baseline (ADC)"]    ,
-                        'SiPM_BaselineRMS_labels' : ["SiPM Baseline RMS (ADC)"],
-                        'SiPM_nSensors_labels'    : ["Number of SiPMs"]        ,
+                        'SIPM_Baseline_labels'    : ["SIPM Baseline (ADC)"]    ,
+                        'SIPM_BaselineRMS_labels' : ["SIPM Baseline RMS (ADC)"],
+                        'SIPM_nSensors_labels'    : ["Number of SIPMs"]        ,
                         'PMTs_AdamPlot_labels'    : [""]                       ,
 
                         'PMT_Baseline_scales'     : [ "linear" ]       ,
                         'PMT_BaselineRMS_scales'  : [ "linear" ]       ,
                         'PMT_nSensors_scales'     : [ "linear" ]       ,
-                        'SiPM_Baseline_scales'    : [ "linear" ]       ,
-                        'SiPM_BaselineRMS_scales' : [ "linear" ]       ,
-                        'SiPM_nSensors_scales'    : [ "linear" ]       ,
+                        'SIPM_Baseline_scales'    : [ "linear" ]       ,
+                        'SIPM_BaselineRMS_scales' : [ "linear" ]       ,
+                        'SIPM_nSensors_scales'    : [ "linear" ]       ,
                         'PMTs_AdamPlot_scales'    : [ "log"    ]       ,
 
                         'n_PMTs'                  : 12,
                         'n_baseline'              : 48000}
 
     test_infile = "irene_bug_Kr_ACTIVE_7bar_RWF.h5"
-    test_infile = os.path.join(ICDATADIR, test_infile)
+    test_infile = os.path.join(OLIVIADATADIR, test_infile)
 
     test_histo = monf.fill_rwf_histos(test_infile, test_config_dict)
 
     test_checkfile = "irene_bug_Kr_ACTIVE_7bar_RWF_histos.h5"
-    test_checkfile = os.path.join(ICDATADIR, test_checkfile)
+    test_checkfile = os.path.join(OLIVIADATADIR, test_checkfile)
     check_histo    = histf.get_histograms_from_file(test_checkfile)
 
     #Uncomment above line if the check_histo contains AdamPlots
@@ -422,175 +423,175 @@ def test_fill_rwf_histos(ICDATADIR):
             assert np.allclose(bins,    test_histo.histos[k].bins[i])
 
 
-def test_kdst_bins():
-    test_dict = {'S1e_bins' : [   0,    10, 2],
-                 'S1w_bins' : [   0,     6, 3],
-                 'S1t_bins' : [   0,     5, 4],
-                 'S2e_bins' : [   0, 15000, 2],
-                 'S2q_bins' : [   0, 15000, 2],
-                 'S2h_bins' : [   0, 15000, 2],
-                 'X_bins'   : [-100,   100, 4],
-                 'Y_bins'   : [-100,   100, 4],
-                 'Z_bins'   : [-100,   100, 4],
-                 'R_bins'   : [-100,   100, 4],
-                 'Phi_bins' : [-100,   100, 4],
-                 'S2t_bins' : [   5,    10, 4],
-
-                 'S1e_labels' : ['S1 energy (pes)'],
-                 'S1w_labels' : [ 'S1 width (mus)'],
-                 'S1t_labels' : [  'S1 time (mus)'],
-                 'S2e_labels' : ['S2 energy (pes)'],
-                 'S2q_labels' : ['S2 charge (pes)'],
-                 'S2h_labels' : ['S2 energy (pes)'],
-                 'X_labels'   : [         'X (mm)'],
-                 'Y_labels'   : [         'Y (mm)'],
-                 'Z_labels'   : [         'Z (mm)'],
-                 'R_labels'   : [         'R (mm)'],
-                 'Phi_labels' : [      'Phi (rad)'],
-                 'S2t_labels' : [  'S2 time (mus)']}
-
-    test_bins = {'S1e' : [   0,     5,   10            ],
-                 'S1w' : [   0,     2,    4,    6      ],
-                 'S1t' : [   0, 1.250,  2.5, 3.75,   5.],
-                 'S2t' : [   0, 1.250,  2.5, 3.75,   5.],
-                 'S2e' : [   0, 7.5e3, 15e3            ],
-                 'S2q' : [   0, 7.5e3, 15e3            ],
-                 'S2h' : [   0, 7.5e3, 15e3            ],
-                 'X'   : [-100,   -50,    0,   50, 100.],
-                 'Y'   : [-100,   -50,    0,   50, 100.],
-                 'Z'   : [-100,   -50,    0,   50, 100.],
-                 'R'   : [-100,   -50,    0,   50, 100.],
-                 'Phi' : [-100,   -50,    0,   50, 100.],
-                 'S2t' : [   5,  6.25,  7.5, 8.75,  10.]}
-
-    out_bins, out_labels = monf.kdst_bins(test_dict)
-
-    for var_name in test_bins:
-        assert np.allclose(out_bins [var_name]              , test_bins [var_name])
-        assert             test_dict[var_name + '_labels'] == out_labels[var_name]
-
-    assert_bins_and_labels_ndim('S2e_X'  , ['X'  , 'S2e'     ], out_bins, out_labels, test_bins, test_dict)
-    assert_bins_and_labels_ndim('S2e_Y'  , ['Y'  , 'S2e'     ], out_bins, out_labels, test_bins, test_dict)
-    assert_bins_and_labels_ndim('S2e_Z'  , ['Z'  , 'S2e'     ], out_bins, out_labels, test_bins, test_dict)
-    assert_bins_and_labels_ndim('S2e_R'  , ['R'  , 'S2e'     ], out_bins, out_labels, test_bins, test_dict)
-    assert_bins_and_labels_ndim('S2e_Phi', ['Phi', 'S2e'     ], out_bins, out_labels, test_bins, test_dict)
-    assert_bins_and_labels_ndim('S2q_X'  , ['X'  , 'S2q'     ], out_bins, out_labels, test_bins, test_dict)
-    assert_bins_and_labels_ndim('S2q_Y'  , ['Y'  , 'S2q'     ], out_bins, out_labels, test_bins, test_dict)
-    assert_bins_and_labels_ndim('S2q_Z'  , ['Z'  , 'S2q'     ], out_bins, out_labels, test_bins, test_dict)
-    assert_bins_and_labels_ndim('S2q_R'  , ['R'  , 'S2q'     ], out_bins, out_labels, test_bins, test_dict)
-    assert_bins_and_labels_ndim('S2q_Phi', ['Phi', 'S2q'     ], out_bins, out_labels, test_bins, test_dict)
-    assert_bins_and_labels_ndim('XY'     , ['X'  , 'Y'       ], out_bins, out_labels, test_bins, test_dict)
-    assert_bins_and_labels_ndim('S2e_XY' , ['X'  , 'Y', 'S2e'], out_bins, out_labels, test_bins, test_dict)
-    assert_bins_and_labels_ndim('S2q_XY' , ['X'  , 'Y', 'S2q'], out_bins, out_labels, test_bins, test_dict)
-
-    variable_names = list(test_bins)
-    variable_names.extend(['S2e_X', 'S2e_Y' , 'S2e_Z', 'S2e_R', 'S2e_Phi',
-                           'S2q_X', 'S2q_Y' , 'S2q_Z', 'S2q_R', 'S2q_Phi',
-                           'XY'   , 'S2e_XY','S2q_XY'])
-    for k in out_bins:
-        assert k in variable_names
-
-
-kdst_variables = ['nS2', 'S1w'  , 'S1h', 'S1e', 'S1t', 'S2w', 'S2h', 'S2e', 'S2q' ,
-                  'S2t', 'Nsipm', 'DT' , 'Z'  , 'X'  , 'Y'  , 'R'  , 'Phi', 'Zrms',
-                  'Xrms', 'Yrms']
-
-
-@given(data_frames(columns=columns(kdst_variables, elements=floats(allow_nan=False))))
-@settings(deadline=None)
-def test_fill_kdst_var_1d(kdst):
-    var_dict = defaultdict(list)
-    monf.fill_kdst_var_1d (kdst, var_dict)
-
-    for var in var_dict:
-        value = kdst[var].values
-        if var in ['S1t', 'S2t', 'S1w']:
-            value = value / units.mus
-        assert np.allclose(value, var_dict[var])
-
-
-@given(data_frames(columns=columns(kdst_variables, elements=floats(allow_nan=False))))
-@settings(deadline=None)
-def test_fill_kdst_var_2d(kdst):
-    var_dict = defaultdict(list)
-    monf.fill_kdst_var_1d (kdst, var_dict)
-    monf.fill_kdst_var_2d (var_dict)
-
-    param_list = ['Z', 'X', 'Y', 'R', 'Phi']
-    kdstE      = kdst['S2e'] .values
-    kdstQ      = kdst['S2q'] .values
-    for param in param_list:
-        valueE = [kdst[param].values, kdstE]
-        valueQ = [kdst[param].values, kdstQ]
-        assert np.allclose(valueE,                            var_dict['S2e_' + param])
-        assert np.allclose(valueQ,                            var_dict['S2q_' + param])
-    np.allclose([kdst['X'].values, kdst['Y'].values],         var_dict['XY'          ])
-    np.allclose([kdst['X'].values, kdst['Y'].values , kdstE], var_dict['S2e_XY'      ])
-    np.allclose([kdst['X'].values, kdst['Y'].values , kdstQ], var_dict['S2q_XY'      ])
-
-
-def test_fill_kdst_histos(ICDATADIR):
-    test_config_dict = {'nS2_bins'  : [-0.5 ,  10.5 ,  11],
-                        'S1w_bins'  : [-0.01,   0.99,  40],
-                        'S1h_bins'  : [    0,     10,  10],
-                        'S1e_bins'  : [    0,     50,  50],
-                        'S1t_bins'  : [    0,    650, 650],
-                        'S2w_bins'  : [    0,     50,  50],
-                        'S2h_bins'  : [    0,   8000, 100],
-                        'S2e_bins'  : [    0,  20000, 100],
-                        'S2q_bins'  : [    0,   2000, 100],
-                        'S2t_bins'  : [  640,   1300, 660],
-                        'Nsipm_bins': [-0.5 , 500.5 , 501],
-                        'DT_bins'   : [    0,    600, 100],
-                        'Z_bins'    : [    0,    600, 100],
-                        'X_bins'    : [ -200,    200,  50],
-                        'Y_bins'    : [ -200,    200,  50],
-                        'R_bins'    : [    0,    200,  50],
-                        'Phi_bins'  : [-3.15,   3.15,  50],
-                        'Zrms_bins' : [    0,     80,  40],
-                        'Xrms_bins' : [    0,    200,  50],
-                        'Yrms_bins' : [    0,    200,  50],
-
-                        'nS2_labels'  : [         'S2 number (#)'],
-                        'S1w_labels'  : [    r'S1 width ($\mu$s)'],
-                        'S1h_labels'  : [       'S1 height (pes)'],
-                        'S1e_labels'  : [       'S1 energy (pes)'],
-                        'S1t_labels'  : [     r'S1 time ($\mu$s)'],
-                        'S2w_labels'  : [    r'S2 width ($\mu$s)'],
-                        'S2h_labels'  : [       'S2 height (pes)'],
-                        'S2e_labels'  : [       'S2 energy (pes)'],
-                        'S2q_labels'  : [       'S2 charge (pes)'],
-                        'S2t_labels'  : [     r'S2 time ($\mu$s)'],
-                        'Nsipm_labels': [       'SiPM number (#)'],
-                        'DT_labels'   : [r'S2 - S1 time ($\mu$s)'],
-                        'Z_labels'    : [                'Z (mm)'],
-                        'X_labels'    : [                'X (mm)'],
-                        'Y_labels'    : [                'Y (mm)'],
-                        'R_labels'    : [                'R (mm)'],
-                        'Phi_labels'  : [             'Phi (rad)'],
-                        'Zrms_labels' : [            'Z rms (mm)'],
-                        'Xrms_labels' : [            'X rms (mm)'],
-                        'Yrms_labels' : [            'Y rms (mm)']}
-
-    test_infile = "dst_NEXT_v1_00_05_Kr_ACTIVE_0_0_7bar_KDST_10evt_new.h5"
-    test_infile = os.path.join(ICDATADIR, test_infile)
-
-    test_histo = monf.fill_kdst_histos(test_infile, test_config_dict)
-
-    test_checkfile = "kdst_histos.h5"
-    test_checkfile = os.path.join(ICDATADIR, test_checkfile)
-    check_histo    = histf.get_histograms_from_file(test_checkfile)
-
-    assert set(check_histo.histos) ==  set(test_histo.histos)
-
-    for k, v in check_histo.histos.items():
-        assert np.allclose(v.data     , test_histo.histos[k].data     )
-        assert np.allclose(v.out_range, test_histo.histos[k].out_range)
-        assert np.allclose(v.errors   , test_histo.histos[k].errors   )
-        assert             v.title   == test_histo.histos[k].title
-        assert             v.labels  == test_histo.histos[k].labels
-        for i, bins in enumerate(v.bins):
-            assert np.allclose(bins,    test_histo.histos[k].bins  [i])
+# def test_kdst_bins():
+#     test_dict = {'S1e_bins' : [   0,    10, 2],
+#                  'S1w_bins' : [   0,     6, 3],
+#                  'S1t_bins' : [   0,     5, 4],
+#                  'S2e_bins' : [   0, 15000, 2],
+#                  'S2q_bins' : [   0, 15000, 2],
+#                  'S2h_bins' : [   0, 15000, 2],
+#                  'X_bins'   : [-100,   100, 4],
+#                  'Y_bins'   : [-100,   100, 4],
+#                  'Z_bins'   : [-100,   100, 4],
+#                  'R_bins'   : [-100,   100, 4],
+#                  'Phi_bins' : [-100,   100, 4],
+#                  'S2t_bins' : [   5,    10, 4],
+#
+#                  'S1e_labels' : ['S1 energy (pes)'],
+#                  'S1w_labels' : [ 'S1 width (mus)'],
+#                  'S1t_labels' : [  'S1 time (mus)'],
+#                  'S2e_labels' : ['S2 energy (pes)'],
+#                  'S2q_labels' : ['S2 charge (pes)'],
+#                  'S2h_labels' : ['S2 energy (pes)'],
+#                  'X_labels'   : [         'X (mm)'],
+#                  'Y_labels'   : [         'Y (mm)'],
+#                  'Z_labels'   : [         'Z (mm)'],
+#                  'R_labels'   : [         'R (mm)'],
+#                  'Phi_labels' : [      'Phi (rad)'],
+#                  'S2t_labels' : [  'S2 time (mus)']}
+#
+#     test_bins = {'S1e' : [   0,     5,   10            ],
+#                  'S1w' : [   0,     2,    4,    6      ],
+#                  'S1t' : [   0, 1.250,  2.5, 3.75,   5.],
+#                  'S2t' : [   0, 1.250,  2.5, 3.75,   5.],
+#                  'S2e' : [   0, 7.5e3, 15e3            ],
+#                  'S2q' : [   0, 7.5e3, 15e3            ],
+#                  'S2h' : [   0, 7.5e3, 15e3            ],
+#                  'X'   : [-100,   -50,    0,   50, 100.],
+#                  'Y'   : [-100,   -50,    0,   50, 100.],
+#                  'Z'   : [-100,   -50,    0,   50, 100.],
+#                  'R'   : [-100,   -50,    0,   50, 100.],
+#                  'Phi' : [-100,   -50,    0,   50, 100.],
+#                  'S2t' : [   5,  6.25,  7.5, 8.75,  10.]}
+#
+#     out_bins, out_labels = monf.kdst_bins(test_dict)
+#
+#     for var_name in test_bins:
+#         assert np.allclose(out_bins [var_name]              , test_bins [var_name])
+#         assert             test_dict[var_name + '_labels'] == out_labels[var_name]
+#
+#     assert_bins_and_labels_ndim('S2e_X'  , ['X'  , 'S2e'     ], out_bins, out_labels, test_bins, test_dict)
+#     assert_bins_and_labels_ndim('S2e_Y'  , ['Y'  , 'S2e'     ], out_bins, out_labels, test_bins, test_dict)
+#     assert_bins_and_labels_ndim('S2e_Z'  , ['Z'  , 'S2e'     ], out_bins, out_labels, test_bins, test_dict)
+#     assert_bins_and_labels_ndim('S2e_R'  , ['R'  , 'S2e'     ], out_bins, out_labels, test_bins, test_dict)
+#     assert_bins_and_labels_ndim('S2e_Phi', ['Phi', 'S2e'     ], out_bins, out_labels, test_bins, test_dict)
+#     assert_bins_and_labels_ndim('S2q_X'  , ['X'  , 'S2q'     ], out_bins, out_labels, test_bins, test_dict)
+#     assert_bins_and_labels_ndim('S2q_Y'  , ['Y'  , 'S2q'     ], out_bins, out_labels, test_bins, test_dict)
+#     assert_bins_and_labels_ndim('S2q_Z'  , ['Z'  , 'S2q'     ], out_bins, out_labels, test_bins, test_dict)
+#     assert_bins_and_labels_ndim('S2q_R'  , ['R'  , 'S2q'     ], out_bins, out_labels, test_bins, test_dict)
+#     assert_bins_and_labels_ndim('S2q_Phi', ['Phi', 'S2q'     ], out_bins, out_labels, test_bins, test_dict)
+#     assert_bins_and_labels_ndim('XY'     , ['X'  , 'Y'       ], out_bins, out_labels, test_bins, test_dict)
+#     assert_bins_and_labels_ndim('S2e_XY' , ['X'  , 'Y', 'S2e'], out_bins, out_labels, test_bins, test_dict)
+#     assert_bins_and_labels_ndim('S2q_XY' , ['X'  , 'Y', 'S2q'], out_bins, out_labels, test_bins, test_dict)
+#
+#     variable_names = list(test_bins)
+#     variable_names.extend(['S2e_X', 'S2e_Y' , 'S2e_Z', 'S2e_R', 'S2e_Phi',
+#                            'S2q_X', 'S2q_Y' , 'S2q_Z', 'S2q_R', 'S2q_Phi',
+#                            'XY'   , 'S2e_XY','S2q_XY'])
+#     for k in out_bins:
+#         assert k in variable_names
+#
+#
+# kdst_variables = ['nS2', 'S1w'  , 'S1h', 'S1e', 'S1t', 'S2w', 'S2h', 'S2e', 'S2q' ,
+#                   'S2t', 'Nsipm', 'DT' , 'Z'  , 'X'  , 'Y'  , 'R'  , 'Phi', 'Zrms',
+#                   'Xrms', 'Yrms']
+#
+#
+# @given(data_frames(columns=columns(kdst_variables, elements=floats(allow_nan=False))))
+# @settings(deadline=None)
+# def test_fill_kdst_var_1d(kdst):
+#     var_dict = defaultdict(list)
+#     monf.fill_kdst_var_1d (kdst, var_dict)
+#
+#     for var in var_dict:
+#         value = kdst[var].values
+#         if var in ['S1t', 'S2t', 'S1w']:
+#             value = value / units.mus
+#         assert np.allclose(value, var_dict[var])
+#
+#
+# @given(data_frames(columns=columns(kdst_variables, elements=floats(allow_nan=False))))
+# @settings(deadline=None)
+# def test_fill_kdst_var_2d(kdst):
+#     var_dict = defaultdict(list)
+#     monf.fill_kdst_var_1d (kdst, var_dict)
+#     monf.fill_kdst_var_2d (var_dict)
+#
+#     param_list = ['Z', 'X', 'Y', 'R', 'Phi']
+#     kdstE      = kdst['S2e'] .values
+#     kdstQ      = kdst['S2q'] .values
+#     for param in param_list:
+#         valueE = [kdst[param].values, kdstE]
+#         valueQ = [kdst[param].values, kdstQ]
+#         assert np.allclose(valueE,                            var_dict['S2e_' + param])
+#         assert np.allclose(valueQ,                            var_dict['S2q_' + param])
+#     np.allclose([kdst['X'].values, kdst['Y'].values],         var_dict['XY'          ])
+#     np.allclose([kdst['X'].values, kdst['Y'].values , kdstE], var_dict['S2e_XY'      ])
+#     np.allclose([kdst['X'].values, kdst['Y'].values , kdstQ], var_dict['S2q_XY'      ])
+#
+#
+# def test_fill_kdst_histos(ICDATADIR):
+#     test_config_dict = {'nS2_bins'  : [-0.5 ,  10.5 ,  11],
+#                         'S1w_bins'  : [-0.01,   0.99,  40],
+#                         'S1h_bins'  : [    0,     10,  10],
+#                         'S1e_bins'  : [    0,     50,  50],
+#                         'S1t_bins'  : [    0,    650, 650],
+#                         'S2w_bins'  : [    0,     50,  50],
+#                         'S2h_bins'  : [    0,   8000, 100],
+#                         'S2e_bins'  : [    0,  20000, 100],
+#                         'S2q_bins'  : [    0,   2000, 100],
+#                         'S2t_bins'  : [  640,   1300, 660],
+#                         'Nsipm_bins': [-0.5 , 500.5 , 501],
+#                         'DT_bins'   : [    0,    600, 100],
+#                         'Z_bins'    : [    0,    600, 100],
+#                         'X_bins'    : [ -200,    200,  50],
+#                         'Y_bins'    : [ -200,    200,  50],
+#                         'R_bins'    : [    0,    200,  50],
+#                         'Phi_bins'  : [-3.15,   3.15,  50],
+#                         'Zrms_bins' : [    0,     80,  40],
+#                         'Xrms_bins' : [    0,    200,  50],
+#                         'Yrms_bins' : [    0,    200,  50],
+#
+#                         'nS2_labels'  : [         'S2 number (#)'],
+#                         'S1w_labels'  : [    r'S1 width ($\mu$s)'],
+#                         'S1h_labels'  : [       'S1 height (pes)'],
+#                         'S1e_labels'  : [       'S1 energy (pes)'],
+#                         'S1t_labels'  : [     r'S1 time ($\mu$s)'],
+#                         'S2w_labels'  : [    r'S2 width ($\mu$s)'],
+#                         'S2h_labels'  : [       'S2 height (pes)'],
+#                         'S2e_labels'  : [       'S2 energy (pes)'],
+#                         'S2q_labels'  : [       'S2 charge (pes)'],
+#                         'S2t_labels'  : [     r'S2 time ($\mu$s)'],
+#                         'Nsipm_labels': [       'SiPM number (#)'],
+#                         'DT_labels'   : [r'S2 - S1 time ($\mu$s)'],
+#                         'Z_labels'    : [                'Z (mm)'],
+#                         'X_labels'    : [                'X (mm)'],
+#                         'Y_labels'    : [                'Y (mm)'],
+#                         'R_labels'    : [                'R (mm)'],
+#                         'Phi_labels'  : [             'Phi (rad)'],
+#                         'Zrms_labels' : [            'Z rms (mm)'],
+#                         'Xrms_labels' : [            'X rms (mm)'],
+#                         'Yrms_labels' : [            'Y rms (mm)']}
+#
+#     test_infile = "dst_NEXT_v1_00_05_Kr_ACTIVE_0_0_7bar_KDST_10evt_new.h5"
+#     test_infile = os.path.join(ICDATADIR, test_infile)
+#
+#     test_histo = monf.fill_kdst_histos(test_infile, test_config_dict)
+#
+#     test_checkfile = "kdst_histos.h5"
+#     test_checkfile = os.path.join(ICDATADIR, test_checkfile)
+#     check_histo    = histf.get_histograms_from_file(test_checkfile)
+#
+#     assert set(check_histo.histos) ==  set(test_histo.histos)
+#
+#     for k, v in check_histo.histos.items():
+#         assert np.allclose(v.data     , test_histo.histos[k].data     )
+#         assert np.allclose(v.out_range, test_histo.histos[k].out_range)
+#         assert np.allclose(v.errors   , test_histo.histos[k].errors   )
+#         assert             v.title   == test_histo.histos[k].title
+#         assert             v.labels  == test_histo.histos[k].labels
+#         for i, bins in enumerate(v.bins):
+#             assert np.allclose(bins,    test_histo.histos[k].bins  [i])
 
 
 def assert_bins_and_labels_ndim(var_name, single_vars, out_bins, out_labels, test_bins, test_dict):

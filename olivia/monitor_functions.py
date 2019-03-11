@@ -16,6 +16,7 @@ from invisible_cities. io  .dst_io        import load_dst
 from invisible_cities. reco.tbl_functions import get_rwf_vectors
 
 from invisible_cities. reco.calib_sensors_functions import modes
+from invisible_cities.reco.calib_functions          import SensorType
 
 
 def pmap_bins(config_dict):
@@ -183,8 +184,8 @@ def fill_pmap_histos(in_path, detector_db, run_number, config_dict):
 
     for in_file in glob.glob(in_path):
         pmaps = load_pmaps(in_file)
-        for ti, pi in enumerate(pmaps):
-            var = fill_pmap_var(pmaps[pi], SiPM_db)
+        for pmap in pmaps.values():
+            var = fill_pmap_var(pmap, SiPM_db)
             histo_manager.fill_histograms(var)
     return histo_manager
 
@@ -203,7 +204,7 @@ def rwf_bins(config_dict):
 
     for k, v in config_dict.items():
         if "PMTs_AdamPlot" in k: continue
-        
+
         if   "_bins"   in k: var_bins  [k.replace("_bins"  , "")] = [np.linspace(v[0], v[1], v[2] + 1)]
         elif "_labels" in k: var_labels[k.replace("_labels", "")] = v
         elif "_scales" in k: var_scales[k.replace("_scales", "")] = v
@@ -232,18 +233,18 @@ def fill_rwf_var(rwf, var_dict, sensor_type):
     sensor_type    = Type of sensor('PMT' or 'SiPM')
     """
 
-    if   sensor_type == "SiPM":
+    if   sensor_type is SensorType.SIPM:
         bls = modes(rwf.astype("int16")).flatten()
-    elif sensor_type == "PMT":
+    elif sensor_type is SensorType.PMT:
         bls = np.mean(rwf, axis=1)
     rms = np.std (rwf, axis=1)
 
-    var_dict[sensor_type + '_Baseline']   .extend(bls)
-    var_dict[sensor_type + '_BaselineRMS'].extend(rms)
-    var_dict[sensor_type + '_nSensors']   .append(len(bls))
+    var_dict[sensor_type.name + '_Baseline']   .extend(bls)
+    var_dict[sensor_type.name + '_BaselineRMS'].extend(rms)
+    var_dict[sensor_type.name + '_nSensors']   .append(len(bls))
 
     #ADAM PLOTS
-    if sensor_type is 'PMT':
+    if sensor_type is SensorType.PMT:
         for i in range(0, len(rwf)):
             var_dict[f'PMT{i}_AdamPlot'].extend(rwf[i])
 
@@ -265,124 +266,124 @@ def fill_rwf_histos(in_path, config_dict):
             var = defaultdict(list)
             nevt, pmtrwf, sipmrwf, _ = get_rwf_vectors(h5in)
             for evt in range(nevt):
-                fill_rwf_var(pmtrwf [evt, :, :n_baseline], var,  "PMT")
-                fill_rwf_var(sipmrwf[evt]                , var, "SiPM")
+                fill_rwf_var(pmtrwf [evt, :, :n_baseline], var,  SensorType.PMT)
+                fill_rwf_var(sipmrwf[evt]                , var,  SensorType.SIPM)
 
         histo_manager.fill_histograms(var)
     return histo_manager
 
 
-def kdst_bins(config_dict):
-    """
-    Generates the binning arrays and label of the kdst monitor plots from the a
-    config dictionary that contains the ranges, number of bins and labels.
-
-    Returns a dictionary with the bins and another with the labels.
-    """
-    var_bins   = {}
-    var_labels = {}
-
-    for k, v in config_dict.items():
-        if   "_bins"   in k: var_bins  [k.replace("_bins"  , "")] = [np.linspace(v[0], v[1], v[2] + 1)]
-        elif "_labels" in k: var_labels[k.replace("_labels", "")] = v
-
-    var_bins  ['S2e_Z'  ] = var_bins  ['Z'  ] + var_bins  ['S2e']
-    var_labels['S2e_Z'  ] = var_labels['Z'  ] + var_labels['S2e']
-
-    var_bins  ['S2q_Z'  ] = var_bins  ['Z'  ] + var_bins  ['S2q']
-    var_labels['S2q_Z'  ] = var_labels['Z'  ] + var_labels['S2q']
-
-    var_bins  ['S2e_R'  ] = var_bins  ['R'  ] + var_bins  ['S2e']
-    var_labels['S2e_R'  ] = var_labels['R'  ] + var_labels['S2e']
-
-    var_bins  ['S2q_R'  ] = var_bins  ['R'  ] + var_bins  ['S2q']
-    var_labels['S2q_R'  ] = var_labels['R'  ] + var_labels['S2q']
-
-    var_bins  ['S2e_Phi'] = var_bins  ['Phi'] + var_bins  ['S2e']
-    var_labels['S2e_Phi'] = var_labels['Phi'] + var_labels['S2e']
-
-    var_bins  ['S2q_Phi'] = var_bins  ['Phi'] + var_bins  ['S2q']
-    var_labels['S2q_Phi'] = var_labels['Phi'] + var_labels['S2q']
-
-    var_bins  ['S2e_X'  ] = var_bins  ['X'  ] + var_bins  ['S2e']
-    var_labels['S2e_X'  ] = var_labels['X'  ] + var_labels['S2e']
-
-    var_bins  ['S2q_X'  ] = var_bins  ['X'  ] + var_bins  ['S2q']
-    var_labels['S2q_X'  ] = var_labels['X'  ] + var_labels['S2q']
-
-    var_bins  ['S2e_Y'  ] = var_bins  ['Y'  ] + var_bins  ['S2e']
-    var_labels['S2e_Y'  ] = var_labels['Y'  ] + var_labels['S2e']
-
-    var_bins  ['S2q_Y'  ] = var_bins  ['Y'  ] + var_bins  ['S2q']
-    var_labels['S2q_Y'  ] = var_labels['Y'  ] + var_labels['S2q']
-
-    var_bins  ['XY'     ] = var_bins  ['X'  ] + var_bins  ['Y'  ]
-    var_labels['XY'     ] = var_labels['X'  ] + var_labels['Y'  ]
-
-    var_bins  ['S2e_XY'] = var_bins  ['X'  ] + var_bins  ['Y'  ] + var_bins  ['S2e']
-    var_labels['S2e_XY'] = var_labels['X'  ] + var_labels['Y'  ] + var_labels['S2e']
-
-    var_bins  ['S2q_XY'] = var_bins  ['X'  ] + var_bins  ['Y'  ] + var_bins  ['S2q']
-    var_labels['S2q_XY'] = var_labels['X'  ] + var_labels['Y'  ] + var_labels['S2q']
-
-    return var_bins, var_labels
-
-
-def fill_kdst_var_1d(kdst, var_dict):
-    """
-    Fills a passed dictionary of lists with the kdst variables to monitor.
-
-    Arguments:
-    kdst     = kdst dataframe.
-    var_dict = Dictionary that stores the variable values.
-    """
-
-    var_names = kdst.keys()
-
-    var_sel       = lambda x: (x not in ['event', 'time', 'peak'])
-    var_ns_to_mus = ['S1t', 'S2t', 'S1w']
-
-    for param in filter(var_sel, list(var_names)):
-        values = kdst[param].values
-        if param in var_ns_to_mus:
-            values = values / units.mus
-        var_dict[param].extend(values)
-
-
-def fill_kdst_var_2d(var_dict):
-    """
-    Makes 2d combinations of the variables stored in a dictionary that contains
-    the kdst variables.
-
-    Arguments:
-    var_dict = Dictionary that stores the variable values.
-    """
-    param_list = ['Z', 'X', 'Y', 'R', 'Phi']
-    for param in param_list:
-        var_dict['S2e_' + param] = np.array([var_dict[param], var_dict['S2e']])
-        var_dict['S2q_' + param] = np.array([var_dict[param], var_dict['S2q']])
-    var_dict    ['XY'          ] = np.array([var_dict['X'  ], var_dict['Y'  ]])
-    var_dict    ['S2e_XY'      ] = np.array([var_dict['X'  ], var_dict['Y'  ], var_dict['S2e']])
-    var_dict    ['S2q_XY'      ] = np.array([var_dict['X'  ], var_dict['Y'  ], var_dict['S2q']])
-
-def fill_kdst_histos(in_path, config_dict):
-    """
-    Creates and returns an HistoManager object with the kdst histograms.
-
-    Arguments:
-    in_path     = String with the path to the file(s) to be monitored.
-    config_dict = Dictionary with the configuration parameters (bins, labels)
-    """
-    var_bins, var_labels = kdst_bins(config_dict)
-
-    histo_manager = histf.create_histomanager_from_dicts(var_bins, var_labels)
-
-    for in_file in glob.glob(in_path):
-        var  = defaultdict(list)
-        kdst = load_dst   (in_file, 'DST', 'Events')
-
-        fill_kdst_var_1d  (kdst, var)
-        fill_kdst_var_2d  (var)
-
-        histo_manager.fill_histograms(var)
-    return histo_manager
+# def kdst_bins(config_dict):
+#     """
+#     Generates the binning arrays and label of the kdst monitor plots from the a
+#     config dictionary that contains the ranges, number of bins and labels.
+#
+#     Returns a dictionary with the bins and another with the labels.
+#     """
+#     var_bins   = {}
+#     var_labels = {}
+#
+#     for k, v in config_dict.items():
+#         if   "_bins"   in k: var_bins  [k.replace("_bins"  , "")] = [np.linspace(v[0], v[1], v[2] + 1)]
+#         elif "_labels" in k: var_labels[k.replace("_labels", "")] = v
+#
+#     var_bins  ['S2e_Z'  ] = var_bins  ['Z'  ] + var_bins  ['S2e']
+#     var_labels['S2e_Z'  ] = var_labels['Z'  ] + var_labels['S2e']
+#
+#     var_bins  ['S2q_Z'  ] = var_bins  ['Z'  ] + var_bins  ['S2q']
+#     var_labels['S2q_Z'  ] = var_labels['Z'  ] + var_labels['S2q']
+#
+#     var_bins  ['S2e_R'  ] = var_bins  ['R'  ] + var_bins  ['S2e']
+#     var_labels['S2e_R'  ] = var_labels['R'  ] + var_labels['S2e']
+#
+#     var_bins  ['S2q_R'  ] = var_bins  ['R'  ] + var_bins  ['S2q']
+#     var_labels['S2q_R'  ] = var_labels['R'  ] + var_labels['S2q']
+#
+#     var_bins  ['S2e_Phi'] = var_bins  ['Phi'] + var_bins  ['S2e']
+#     var_labels['S2e_Phi'] = var_labels['Phi'] + var_labels['S2e']
+#
+#     var_bins  ['S2q_Phi'] = var_bins  ['Phi'] + var_bins  ['S2q']
+#     var_labels['S2q_Phi'] = var_labels['Phi'] + var_labels['S2q']
+#
+#     var_bins  ['S2e_X'  ] = var_bins  ['X'  ] + var_bins  ['S2e']
+#     var_labels['S2e_X'  ] = var_labels['X'  ] + var_labels['S2e']
+#
+#     var_bins  ['S2q_X'  ] = var_bins  ['X'  ] + var_bins  ['S2q']
+#     var_labels['S2q_X'  ] = var_labels['X'  ] + var_labels['S2q']
+#
+#     var_bins  ['S2e_Y'  ] = var_bins  ['Y'  ] + var_bins  ['S2e']
+#     var_labels['S2e_Y'  ] = var_labels['Y'  ] + var_labels['S2e']
+#
+#     var_bins  ['S2q_Y'  ] = var_bins  ['Y'  ] + var_bins  ['S2q']
+#     var_labels['S2q_Y'  ] = var_labels['Y'  ] + var_labels['S2q']
+#
+#     var_bins  ['XY'     ] = var_bins  ['X'  ] + var_bins  ['Y'  ]
+#     var_labels['XY'     ] = var_labels['X'  ] + var_labels['Y'  ]
+#
+#     var_bins  ['S2e_XY'] = var_bins  ['X'  ] + var_bins  ['Y'  ] + var_bins  ['S2e']
+#     var_labels['S2e_XY'] = var_labels['X'  ] + var_labels['Y'  ] + var_labels['S2e']
+#
+#     var_bins  ['S2q_XY'] = var_bins  ['X'  ] + var_bins  ['Y'  ] + var_bins  ['S2q']
+#     var_labels['S2q_XY'] = var_labels['X'  ] + var_labels['Y'  ] + var_labels['S2q']
+#
+#     return var_bins, var_labels
+#
+#
+# def fill_kdst_var_1d(kdst, var_dict):
+#     """
+#     Fills a passed dictionary of lists with the kdst variables to monitor.
+#
+#     Arguments:
+#     kdst     = kdst dataframe.
+#     var_dict = Dictionary that stores the variable values.
+#     """
+#
+#     var_names = kdst.keys()
+#
+#     var_sel       = lambda x: (x not in ['event', 'time', 'peak'])
+#     var_ns_to_mus = ['S1t', 'S2t', 'S1w']
+#
+#     for param in filter(var_sel, list(var_names)):
+#         values = kdst[param].values
+#         if param in var_ns_to_mus:
+#             values = values / units.mus
+#         var_dict[param].extend(values)
+#
+#
+# def fill_kdst_var_2d(var_dict):
+#     """
+#     Makes 2d combinations of the variables stored in a dictionary that contains
+#     the kdst variables.
+#
+#     Arguments:
+#     var_dict = Dictionary that stores the variable values.
+#     """
+#     param_list = ['Z', 'X', 'Y', 'R', 'Phi']
+#     for param in param_list:
+#         var_dict['S2e_' + param] = np.array([var_dict[param], var_dict['S2e']])
+#         var_dict['S2q_' + param] = np.array([var_dict[param], var_dict['S2q']])
+#     var_dict    ['XY'          ] = np.array([var_dict['X'  ], var_dict['Y'  ]])
+#     var_dict    ['S2e_XY'      ] = np.array([var_dict['X'  ], var_dict['Y'  ], var_dict['S2e']])
+#     var_dict    ['S2q_XY'      ] = np.array([var_dict['X'  ], var_dict['Y'  ], var_dict['S2q']])
+#
+# def fill_kdst_histos(in_path, config_dict):
+#     """
+#     Creates and returns an HistoManager object with the kdst histograms.
+#
+#     Arguments:
+#     in_path     = String with the path to the file(s) to be monitored.
+#     config_dict = Dictionary with the configuration parameters (bins, labels)
+#     """
+#     var_bins, var_labels = kdst_bins(config_dict)
+#
+#     histo_manager = histf.create_histomanager_from_dicts(var_bins, var_labels)
+#
+#     for in_file in glob.glob(in_path):
+#         var  = defaultdict(list)
+#         kdst = load_dst   (in_file, 'DST', 'Events')
+#
+#         fill_kdst_var_1d  (kdst, var)
+#         fill_kdst_var_2d  (var)
+#
+#         histo_manager.fill_histograms(var)
+#     return histo_manager
