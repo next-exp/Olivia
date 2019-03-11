@@ -26,6 +26,16 @@ mcs_data = namedtuple('mcs_data', 'pmap hdst')
 
 
 @pytest.fixture(scope = 'session')
+def OLIVIADIR():
+    return os.environ['OLIVIADIR']
+
+
+@pytest.fixture(scope = 'session')
+def OLIVIADATADIR(OLIVIADIR):
+    return os.path.join(OLIVIADIR, "test_data/")
+
+
+@pytest.fixture(scope = 'session')
 def ICDIR():
     return os.environ['ICDIR']
 
