@@ -4,13 +4,17 @@ import json
 
 import numpy as np
 
-from   olivia.hist_io   import save_histomanager_to_file
-from   invisible_cities.core.configure import configure
+from enum import Enum
 
-import olivia.monitor_functions   as monf
+import olivia.monitor_functions as monf
 
+from olivia.hist_io import save_histomanager_to_file
 
-data_types = ['rwf', 'pmaps', 'kdst']
+from invisible_cities.core.configure import configure
+
+class InputDataType(Enum):
+    rwf   = 0
+    pmaps = 1
 
 def olivia(conf):
     print(conf)
@@ -18,22 +22,21 @@ def olivia(conf):
     file_out     = os.path.expandvars(conf.file_out)
     detector_db  =                    conf.detector_db
     run_number   =                int(conf.run_number)
-    data_type    =                    conf.data_type
     histo_config =                    conf.histo_config
 
-    if data_type not in data_types:
-        print(f'Error: Data type {data_type} is not recognized.')
-        print(f'Supported data types: {data_types}')
-        sys.exit(2)
+    try:
+        data_type = InputDataType[conf.data_type]
+    except KeyError:
+        print(f'Error: Data type {conf.data_type} is not recognized.')
+        raise
 
     with open(histo_config) as  config_file:
         config_dict = json.load(config_file)
-        if   data_type == 'rwf'  :
+        if   data_type == InputDataType.rwf  :
             histo_manager = monf.fill_rwf_histos (files_in, config_dict)
-        elif data_type == 'pmaps':
-            histo_manager = monf.fill_pmap_histos(files_in, detector_db, run_number, config_dict)
-        elif data_type == 'kdst' :
-            histo_manager = monf.fill_kdst_histos(files_in, config_dict)
+        elif data_type == InputDataType.pmaps:
+            histo_manager = monf.fill_pmap_histos(files_in, detector_db,
+                                                  run_number, config_dict)
         save_histomanager_to_file(histo_manager, file_out)
 
 

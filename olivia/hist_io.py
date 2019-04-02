@@ -1,9 +1,6 @@
 import numpy  as np
 import tables as tb
 
-from hypothesis    import settings
-from hypothesis    import given
-
 from invisible_cities.reco       import tbl_functions as tbl
 
 from olivia.histos import HistoManager

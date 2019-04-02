@@ -1,40 +1,71 @@
 import numpy             as np
 import matplotlib.pyplot as plt
 
-from olivia.hist_io        import get_histograms_from_file
-from olivia.histos         import Histogram
-from olivia.histos         import HistoManager
+from olivia.hist_io import get_histograms_from_file
+from olivia.histos  import                Histogram
+from olivia.histos  import             HistoManager
 
 from invisible_cities.icaro.hst_functions  import shift_to_bin_centers
 from invisible_cities.core .core_functions import weighted_mean_and_std
 
 
-def plot_histograms_from_file(histofile, histonames='all', group_name='HIST', plot_errors=False, out_path=None, reference_histo=None):
+def plot_histograms_from_file(histofile,
+                              histonames      =  'all',
+                              group_name      = 'HIST',
+                              plot_errors     =  False,
+                              out_path        =   None,
+                              reference_histo =   None):
     """
-    Plots the Histograms of a given file containing an HistoManager in a 3 column plot grid.
+    Plots the Histograms of a given file containing a
+    HistoManager in a 3 column plot grid.
 
-    histofile       = String. Path to the file containing the histograms.
-    histonames      = List with histogram name to be plotted, if 'all', all histograms are plotted.
-    group_name      = String. Name of the group were Histograms were saved.
-    plot_errors     = Boolean. If true, plot the associated errors instead of the data.
-    out_path        = String. Path to save the histograms in png. If not passed, histograms won't be saved.
-    reference_histo = String. Path to a file containing the reference histograms.
-                      If not passed reference histograms won't be plotted.
+    histofile       = String.
+                      Path to the file containing the histograms.
+    histonames      = List with histogram name to be plotted,
+                      if 'all', all histograms are plotted.
+    group_name      = String.
+                      Name of the group were Histograms were saved.
+    plot_errors     = Boolean.
+                      If true, plot the associated errors
+                      instead of the data.
+    out_path        = String.
+                      Path to save the histograms in png.
+                      If not passed, histograms won't be saved.
+    reference_histo = String.
+                      Path to a file containing the reference
+                      histograms.
+                      If not passed reference histograms won't
+                      be plotted.
     """
     histograms          = get_histograms_from_file(histofile      , group_name)
     if reference_histo:
         reference_histo = get_histograms_from_file(reference_histo, group_name)
-    plot_histograms(histograms, histonames=histonames, plot_errors=plot_errors, out_path=out_path, reference_histo=reference_histo)
+
+    plot_histograms(histograms,
+                    histonames      =      histonames,
+                    plot_errors     =     plot_errors,
+                    out_path        =        out_path,
+                    reference_histo = reference_histo)
 
 
-def plot_histogram(histogram, ax=None, plot_errors=False, draw_color='black', stats=True, normed=True):
+def plot_histogram(histogram,
+                   ax          =    None,
+                   plot_errors =   False,
+                   draw_color  = 'black',
+                   stats       =    True,
+                   normed      =    True):
     """
     Plot a Histogram.
 
-    ax          = Axes object to plot the figure. If not passed, a new axes will be created.
-    plot_errors = Boolean. If true, plot the associated errors instead of the data.
+    ax          = Axes object to plot the figure.
+                  If not passed, a new axes will be created.
+    plot_errors = Boolean.
+                  If true, plot the associated errors
+                  instead of the data.
     draw_color  = String with the linecolor.
-    stats       = Boolean. If true, histogram statistics info is added to the plotself.
+    stats       = Boolean.
+                  If true, histogram statistics info is
+                  added to the plotself.
     normed      = Boolean. If true, histogram is normalized.
     """
     if ax is None:
@@ -68,7 +99,10 @@ def plot_histogram(histogram, ax=None, plot_errors=False, draw_color='black', st
                                                                            get_percentage(out_range[1,0], np.sum(entries)))
 
             if np.sum(entries) > 0:
-                mean, std = weighted_mean_and_std(shift_to_bin_centers(bins[0]), entries, frequentist = True, unbiased = True)
+                mean, std = weighted_mean_and_std(shift_to_bin_centers(bins[0]),
+                                                  entries,
+                                                  frequentist = True,
+                                                  unbiased    = True)
             else:
                 mean, std = 0, 0
 
@@ -137,17 +171,33 @@ def plot_histogram(histogram, ax=None, plot_errors=False, draw_color='black', st
     ax .xaxis.offsetText.set_fontweight('bold')
 
 
-def plot_histograms(histo_manager, histonames='all', n_columns=3, plot_errors=False, out_path=None, reference_histo=None, normed=True):
+def plot_histograms(histo_manager,
+                    histonames      = 'all',
+                    n_columns       =     3,
+                    plot_errors     = False,
+                    out_path        =  None,
+                    reference_histo =  None,
+                    normed          =  True):
     """
     Plot Histograms from a HistoManager.
 
-    histo_manager   = HistoManager object containing the Histograms to be plotted.
-    histonames      = List with histogram name to be plotted, if 'all', all histograms are plotted.
-    n_columns       = Int. Number of columns to distribute the histograms.
-    plot_errors     = Boolean. If true, plot the associated errors instead of the data.
-    out_path        = String. Path to save the histograms in png. If not passed, histograms won't be saved.
-    reference_histo = HistoManager object containing the Histograms to be plotted as reference.
-    normed          = Boolean. If true, histograms are normalized.
+    histo_manager   = HistoManager object containing the
+                      Histograms to be plotted.
+    histonames      = List with histogram name to be plotted,
+                      if 'all', all histograms are plotted.
+    n_columns       = Int.
+                      Number of columns to distribute
+                      the histograms.
+    plot_errors     = Boolean.
+                      If true, plot the associated errors
+                      instead of the data.
+    out_path        = String.
+                      Path to save the histograms in png.
+                      If not passed, histograms won't be saved.
+    reference_histo = HistoManager object containing the Histograms
+                      to be plotted as reference.
+    normed          = Boolean.
+                      If true, histograms are normalized.
     """
     if histonames == 'all':
         histonames = histo_manager.histos
@@ -157,17 +207,28 @@ def plot_histograms(histo_manager, histonames='all', n_columns=3, plot_errors=Fa
         n_columns = min(3, n_histos)
         n_rows    = int(np.ceil(n_histos / n_columns))
 
-        fig, axes = plt.subplots(n_rows, n_columns, figsize=(8 * n_columns, 6 * n_rows))
+        fig, axes = plt.subplots(n_rows, n_columns,
+                                 figsize=(8 * n_columns, 6 * n_rows))
 
     for i, histoname in enumerate(histonames):
         if out_path:
             fig, ax = plt.subplots(1, 1, figsize=(8, 6))
         else:
             ax = axes.flatten()[i] if isinstance(axes, np.ndarray) else axes
+
         if reference_histo:
             if len(reference_histo[histoname].bins) == 1:
-                plot_histogram(reference_histo[histoname], ax=ax, plot_errors=plot_errors, normed=normed, draw_color='red', stats=False)
-        plot_histogram        (histo_manager  [histoname], ax=ax, plot_errors=plot_errors, normed=normed)
+                plot_histogram(reference_histo[histoname],
+                               ax          =           ax,
+                               plot_errors =  plot_errors,
+                               normed      =       normed,
+                               draw_color  =        'red',
+                               stats       =        False)
+
+        plot_histogram        (histo_manager  [histoname],
+                               ax          =           ax,
+                               plot_errors =  plot_errors,
+                               normed      =       normed)
 
         if out_path:
             fig.tight_layout()
@@ -180,13 +241,15 @@ def plot_histograms(histo_manager, histonames='all', n_columns=3, plot_errors=Fa
 
 def get_percentage(a, b):
     """
-    Given two flots, return the percentage between them.
+    Given two flots a and b,
+    return the percentage a is of b.
     """
     return 100 * a / b if b else -100
 
 
 def average_empty(x, bins):
     """
-    Returns the weighted mean. If all weights are 0, the mean is considered to be 0.
+    Returns the weighted mean.
+    If all weights are 0, the mean is considered to be 0.
     """
     return np.average(bins, weights=x) if np.any(x > 0.) else 0.
