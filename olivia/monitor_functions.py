@@ -19,8 +19,7 @@ from invisible_cities.reco.calib_functions         import      SensorType
 
 
 def pmap_bins(config_dict):
-    """
-    Generates the binning arrays, label and scale of the monitor plots
+    """Generates the binning arrays, label and scale of the monitor plots
     from the config dictionary that contains the ranges, number of bins,
     labels and scales.
 
@@ -95,15 +94,18 @@ def pmap_bins(config_dict):
 
 
 def fill_pmap_var_1d(speaks, var_dict, ptype, DataSiPM=None):
-    """
-    Fills a passed dictionary of lists with the pmap variables to monitor.
+    """Fills a passed dictionary of lists with the pmap variables to monitor.
 
-    Arguments:
-    speaks   = List of S1 or S2s.
-    var_dict = Dictionary that stores the variable values.
-    ptype    = Type of pmap ('S1' or 'S2')
-    DataSiPM = Database with the SiPM information. Only needed in case of 'S2'
-               ptype
+    Parameters
+    ----------
+    speaks   : sequence
+    List of S1 or S2s.
+    var_dict : dict
+    Stores the variable values.
+    ptype    : str
+    Type of pmap ('S1' or 'S2')
+    DataSiPM : Database
+    Contains the SiPM information. Only needed in case of 'S2' ptype
     """
     var_dict[ptype + '_Number'].append(len(speaks))
     for speak in speaks:
@@ -130,13 +132,15 @@ def fill_pmap_var_1d(speaks, var_dict, ptype, DataSiPM=None):
 
 
 def fill_pmap_var_2d(var_dict, ptype):
-    """
-    Makes 2d combinations of the variables stored in a dictionary that contains
-    the pmaps variables.
+    """Makes 2d combinations of the variables stored in a dictionary
+    that contains the pmaps variables.
 
-    Arguments:
-    var_dict = Dictionary that stores the variable values.
-    ptype    = Type of pmap ('S1' or 'S2')
+    Parameters
+    ----------
+    var_dict : dict
+    Stores the variable values.
+    ptype    : str
+    Type of pmap ('S1' or 'S2')
     """
     param_list = ['Width', 'Height', 'Charge']
     for param in param_list:
@@ -182,13 +186,16 @@ def fill_pmap_var(pmap, sipm_db):
 
 
 def fill_pmap_histos(in_path, detector_db, run_number, config_dict):
-    """
-    Creates and returns an HistoManager object with the pmap histograms.
+    """Creates and returns a HistoManager object with the pmap histograms.
 
-    Arguments:
-    in_path     = String with the path to the file(s) to be monitored.
-    run_number  = Run number of the dataset (used to obtain the SiPM database).
-    config_dict = Dictionary with the configuration parameters (bins, labels).
+    Parameters
+    ----------
+    in_path     : str
+    Path to the file(s) to be monitored.
+    run_number  : int
+    Run number of the dataset (used to obtain the SiPM database).
+    config_dict : dict
+    Contains the configuration parameters (bins, labels).
     """
     var_bins, var_labels, var_scales = pmap_bins(config_dict)
     histo_manager        = histf.create_histomanager_from_dicts(var_bins, var_labels, var_scales)
@@ -203,8 +210,7 @@ def fill_pmap_histos(in_path, detector_db, run_number, config_dict):
 
 
 def rwf_bins(config_dict):
-    """
-    Generates the binning arrays, label  and scale of the rwf monitor
+    """Generates the binning arrays, label and scale of the rwf monitor
     plots from the a config dictionary that contains the ranges,
     number of bins, labels and scales.
 
@@ -233,13 +239,16 @@ def rwf_bins(config_dict):
 
 
 def fill_rwf_var(rwf, var_dict, sensor_type):
-    """
-    Fills a passed dictionary of lists with the rwf variables to monitor.
+    """Fills a passed dictionary of lists with the rwf variables to monitor.
 
-    Arguments:
-    rwf            = Raw waveforms
-    var_dict       = Dictionary that stores the variable values.
-    sensor_type    = Type of sensor('PMT' or 'SiPM')
+    Parameters
+    ----------
+    rwf         : dataframe
+    Raw waveforms.
+    var_dict    : dict
+    Stores the variable values.
+    sensor_type : AutoNameEnumBase
+    Type of sensor: SensorType.SIPM or SensorType.PMT.
     """
 
     if   sensor_type is SensorType.SIPM:
@@ -252,19 +261,21 @@ def fill_rwf_var(rwf, var_dict, sensor_type):
     var_dict[sensor_type.name + '_BaselineRMS'].extend(rms)
     var_dict[sensor_type.name + '_nSensors']   .append(len(bls))
 
-    #ADAM PLOTS
+    #PMT_#_ACD plots
     if sensor_type is SensorType.PMT:
         for i in range(0, len(rwf)):
             var_dict[f'PMT{i}_ADCs'].extend(rwf[i])
 
 
 def fill_rwf_histos(in_path, config_dict):
-    """
-    Creates and returns an HistoManager object with the waveform histograms.
+    """Creates and returns a HistoManager object with the waveform histograms.
 
-    Arguments:
-    in_path     = String with the path to the file(s) to be monitored.
-    config_dict = Dictionary with the configuration parameters (bins, labels)
+    Parameters
+    ----------
+    in_path     : str
+    Path to the file(s) to be monitored.
+    config_dict : dict
+    Contains the configuration parameters (bins, labels).
     """
     var_bins, var_labels, var_scales, n_baseline = rwf_bins(config_dict)
 
@@ -285,8 +296,7 @@ def fill_rwf_histos(in_path, config_dict):
 
 
 # def kdst_bins(config_dict):
-#     """
-#     Generates the binning arrays and label of the kdst monitor plots from the a
+#     """Generates the binning arrays and label of the kdst monitor plots from the
 #     config dictionary that contains the ranges, number of bins and labels.
 #
 #     Returns a dictionary with the bins and another with the labels.
@@ -341,12 +351,13 @@ def fill_rwf_histos(in_path, config_dict):
 #
 #
 # def fill_kdst_var_1d(kdst, var_dict):
-#     """
-#     Fills a passed dictionary of lists with the kdst variables to monitor.
+#     """Fills a passed dictionary of lists with the kdst variables to monitor.
 #
-#     Arguments:
-#     kdst     = kdst dataframe.
-#     var_dict = Dictionary that stores the variable values.
+#     Parameters
+#     ----------
+#     kdst     : kdst dataframe.
+#     var_dict : dict
+#     Stores the variable values.
 #     """
 #
 #     var_names = kdst.keys()

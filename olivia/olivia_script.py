@@ -1,23 +1,21 @@
 import sys
 import os
 import json
-
 import numpy as np
 
 from enum import Enum
 
-import olivia.monitor_functions as monf
-
-from olivia.hist_io import save_histomanager_to_file
-
+from olivia          .hist_io        import save_histomanager_to_file
 from invisible_cities.core.configure import configure
+import olivia.monitor_functions          as monf
+
 
 class InputDataType(Enum):
     rwf   = 0
     pmaps = 1
 
+
 def olivia(conf):
-    print(conf)
     files_in     = os.path.expandvars(conf.files_in)
     file_out     = os.path.expandvars(conf.file_out)
     detector_db  =                    conf.detector_db
@@ -30,7 +28,7 @@ def olivia(conf):
         print(f'Error: Data type {conf.data_type} is not recognized.')
         raise
 
-    with open(histo_config) as  config_file:
+    with open(histo_config) as config_file:
         config_dict = json.load(config_file)
         if   data_type == InputDataType.rwf  :
             histo_manager = monf.fill_rwf_histos (files_in, config_dict)

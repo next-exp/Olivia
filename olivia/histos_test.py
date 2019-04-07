@@ -49,9 +49,8 @@ def bins_arrays(draw, dimension=0):
     bin_additive      = draw(arrays(float, dimension,
                              floats(1.1 , 1e3, allow_nan=False, allow_infinity=False)))
     bin_upper_margins = bin_lower_margins + bin_additive
-
-    bins = [ np.linspace(bin_lower_margins[i], bin_upper_margins[i], draw(integers(2, 20))) for i, _ in enumerate(bin_lower_margins) ]
-
+    bins              = [np.linspace(bin_lower_margins[i], bin_upper_margins[i], draw(integers(2, 20)))
+                         for i, _ in enumerate(bin_lower_margins)]
     return bins
 
 
@@ -105,6 +104,7 @@ def histograms_lists(draw, number=0, dimension=0, fixed_bins=None):
 
     return args, histograms
 
+
 # @mark.skip(reason="Delaying elimination of solid cities")
 @given(bins_arrays())
 @settings(deadline=None)
@@ -121,6 +121,7 @@ def test_histogram_initialization(bins):
     assert             test_histo.labels  == label
     assert             test_histo.title   == title
     assert             test_histo.scale   == scale
+
 
 # @mark.skip(reason="Delaying elimination of solid cities")
 @given(bins_arrays())
@@ -151,20 +152,21 @@ def test_histogram_initialization_with_values(bins):
     assert             test_histo.title   == title
     assert             test_histo.scale   == scale
 
+
 # @mark.skip(reason="Delaying elimination of solid cities")
 @given(empty_histograms())
 @settings(deadline=None)
 def test_histogram_fill(empty_histogram):
     _, test_histogram  = empty_histogram
     histobins          =  test_histogram.bins
-    n_points           =   np.random.randint(5, 201)
-    test_data          = [ np.random.uniform( bins[0]  * (1 + np.random.uniform()),
-                                              bins[-1] * (1 + np.random.uniform()),
-                                              n_points) for bins in histobins ]
+    n_points           =  np.random.randint(5, 201)
+    test_data          = [np.random.uniform(bins[ 0] * (1 + np.random.uniform()),
+                                            bins[-1] * (1 + np.random.uniform()),
+                                            n_points) for bins in histobins]
     test_histogram.fill(test_data)
-    out_of_range       = [ np.array([ np.count_nonzero(test_data[i] < bins[0] ),
-                                      np.count_nonzero(test_data[i] > bins[-1]) ])
-                                      for i, bins in enumerate(histobins) ]
+    out_of_range       = [np.array([np.count_nonzero(test_data[i] < bins[0]),
+                                    np.count_nonzero(test_data[i] > bins[-1])])
+                                    for i, bins in enumerate(histobins)]
     test_out_of_range  = np.array(out_of_range).T
     test_data          = np.histogramdd(np.asarray(test_data).T, test_histogram.bins)[0]
     test_errors        = np.sqrt(test_data)
@@ -173,21 +175,22 @@ def test_histogram_fill(empty_histogram):
     assert np.allclose(test_histogram.errors   , test_errors      )
     assert np.allclose(test_histogram.out_range, test_out_of_range)
 
+
 # @mark.skip(reason="Delaying elimination of solid cities")
 @given(empty_histograms())
 @settings(deadline=None)
 def test_histogram_fill_with_weights(empty_histogram):
     _, test_histogram = empty_histogram
     histobins         =  test_histogram.bins
-    n_points          =   np.random.randint(50, 201)
-    test_data         = [ np.random.uniform( bins[0]  * (1 + np.random.uniform()),
-                                             bins[-1] * (1 + np.random.uniform()),
-                                             n_points) for bins in histobins ]
+    n_points          =  np.random.randint(50, 201)
+    test_data         = [np.random.uniform(bins[ 0] * (1 + np.random.uniform()),
+                                           bins[-1] * (1 + np.random.uniform()),
+                                           n_points) for bins in histobins]
     test_weights      =   np.random.uniform(1, 10, n_points)
     test_histogram.fill(test_data, test_weights)
-    out_of_range      = [ np.array([ np.count_nonzero(test_data[i] < bins[0] ),
-                                     np.count_nonzero(test_data[i] > bins[-1]) ])
-                                     for i, bins in enumerate(histobins) ]
+    out_of_range      = [np.array([np.count_nonzero(test_data[i] < bins[0]),
+                                   np.count_nonzero(test_data[i] > bins[-1])])
+                                   for i, bins in enumerate(histobins)]
     test_out_of_range = np.array(out_of_range).T
     test_data         = np.histogramdd(np.asarray(test_data).T, test_histogram.bins, weights=test_weights)[0]
     test_errors       = np.sqrt(test_data)
@@ -196,12 +199,13 @@ def test_histogram_fill_with_weights(empty_histogram):
     assert np.allclose(test_histogram.errors   , test_errors      )
     assert np.allclose(test_histogram.out_range, test_out_of_range)
 
+
 # @mark.skip(reason="Delaying elimination of solid cities")
 def test_bin_data():
-    bins           = [ np.linspace(0., 5., 6) ]
-    label          = [ 'Random distribution'  ]
-    scale          = [ 'linear' ]
-    title          =   'Test_histogram'
+    bins           = [np.linspace(0., 5., 6)]
+    label          = ['Random distribution' ]
+    scale          = ['linear' ]
+    title          =  'Test_histogram'
     data           = np.array([-1., 2.2, 3.2, 4.5, 6.3, 7.1, 4.9, 3.1, 0.2, 2.1, 2.2, 1.1])
     test_data      = [1, 1, 3, 2, 2]
     test_out_range = [[1], [2]]
@@ -212,12 +216,13 @@ def test_bin_data():
     assert np.allclose(binned_data, test_data     )
     assert np.allclose(out_range  , test_out_range)
 
+
 # @mark.skip(reason="Delaying elimination of solid cities")
 def test_count_out_of_range():
-    bins           = [ np.linspace(0., 5., 6) ]
-    label          = [ 'Random distribution'  ]
-    scale          = [ 'linear']
-    title          =    'Test_histogram'
+    bins           = [np.linspace(0., 5., 6)]
+    label          = ['Random distribution' ]
+    scale          = ['linear']
+    title          =  'Test_histogram'
     data           = np.array([-1., 2.2, 3.2, 4.5, 6.3, 7.1, 4.9, 3.1, 0.2, 2.1, 2.2, 1.1])
     test_data      = [1, 1, 3, 2, 2]
     test_out_range = [[1], [2]]
@@ -226,6 +231,7 @@ def test_count_out_of_range():
     out_range = test_histo.count_out_of_range(np.array(data, ndmin=2))
 
     assert np.allclose(out_range, test_out_range)
+
 
 # @mark.skip(reason="Delaying elimination of solid cities")
 @given(filled_histograms())
@@ -236,6 +242,7 @@ def test_update_errors(filled_histogram):
     test_histogram.update_errors()
     assert np.allclose(test_histogram.errors, np.sqrt(test_histogram.data))
 
+
 # @mark.skip(reason="Delaying elimination of solid cities")
 @given(filled_histograms())
 @settings(deadline=None)
@@ -244,6 +251,7 @@ def test_update_errors_with_values(filled_histogram):
     new_errors        = np.random.uniform(0., 1000, size=test_histogram.data.shape)
     test_histogram.update_errors(new_errors)
     assert np.allclose(test_histogram.errors, new_errors)
+
 
 # @mark.skip(reason="Delaying elimination of solid cities")
 @given(filled_histograms(fixed_bins=[[50, 900, 20]]),
@@ -263,6 +271,7 @@ def test_add_histograms(first_histogram, second_histogram):
     assert             sum_histogram.title   ==         test_histogram1.title
     assert             sum_histogram.scale   ==         test_histogram1.scale
 
+
 # @mark.skip(reason="Delaying elimination of solid cities")
 @given(filled_histograms(fixed_bins=[[50, 900, 20]]),
        filled_histograms(fixed_bins=[[50, 900,  5]]))
@@ -273,6 +282,7 @@ def test_add_histograms_with_incompatible_binning_raises_ValueError(first_histog
 
     with raises(ValueError):
         sum_histogram = test_histogram1 + test_histogram2
+
 
 # @mark.skip(reason="Delaying elimination of solid cities")
 @given(filled_histograms(fixed_bins=[[50, 900, 20], [20, 180, 15]]),
@@ -291,6 +301,7 @@ def test_add_histograms_2d(first_histogram, second_histogram):
     assert             sum_histogram.labels  ==         test_histogram1.labels
     assert             sum_histogram.title   ==         test_histogram1.title
 
+
 # @mark.skip(reason="Delaying elimination of solid cities")
 @given   (histograms_lists())
 @settings(deadline=None)
@@ -301,10 +312,12 @@ def test_histomanager_initialization_with_histograms(histogram_list):
     for histogram in list_of_histograms:
         assert_histogram_equality(histogram, histogram_manager[histogram.title])
 
+
 # @mark.skip(reason="Delaying elimination of solid cities")
 def test_histomanager_initialization_without_histograms():
     histogram_manager = HistoManager()
     assert len(histogram_manager.histos) == 0
+
 
 # @mark.skip(reason="Delaying elimination of solid cities")
 @given(one_of(empty_histograms(), filled_histograms()))
@@ -316,6 +329,7 @@ def test_new_histogram_in_histomanager(test_histogram):
     histogram_manager.new_histogram(histogram)
 
     assert_histogram_equality(histogram, histogram_manager[histoname])
+
 
 # @mark.skip(reason="Delaying elimination of solid cities")
 @given   (histograms_lists())
@@ -330,17 +344,17 @@ def test_fill_histograms_in_histomanager(histogram_list):
     test_out_of_range = {}
     old_out_of_range  = {}
     for i, title in enumerate(titles):
-        old_data_values  [title] =   np.copy(histogram_manager[title].data     )
-        old_out_of_range [title] =   np.copy(histogram_manager[title].out_range)
-        n_points                 =   np.random.randint(5, 201)
-        test_data                = [ np.random.uniform( bins[0]  * (1 + np.random.uniform()),
-                                                        bins[-1] * (1 + np.random.uniform()),
-                                                        n_points)  for bins in histobins[i] ]
+        old_data_values  [title] =  np.copy(histogram_manager[title].data     )
+        old_out_of_range [title] =  np.copy(histogram_manager[title].out_range)
+        n_points                 =  np.random.randint(5, 201)
+        test_data                = [np.random.uniform(bins[ 0] * (1 + np.random.uniform()),
+                                                      bins[-1] * (1 + np.random.uniform()),
+                                                      n_points) for bins in histobins[i]]
         test_data_values [title] = test_data
-        out_of_range             = [ np.array([ np.count_nonzero(test_data[j] < bins[0] ),
-                                                np.count_nonzero(test_data[j] > bins[-1]) ])
-                                                for j, bins in enumerate(histobins[i])     ]
-        test_out_of_range[title] =   np.array(out_of_range).T
+        out_of_range             = [np.array([np.count_nonzero(test_data[j] < bins[0]),
+                                              np.count_nonzero(test_data[j] > bins[-1])])
+                                              for j, bins in enumerate(histobins[i])]
+        test_out_of_range[title] =  np.array(out_of_range).T
 
     histogram_manager.fill_histograms(test_data_values)
 
@@ -351,6 +365,7 @@ def test_fill_histograms_in_histomanager(histogram_list):
         assert np.allclose(histogram.data     ,         test_data                    + old_data                   )
         assert np.allclose(histogram.errors   , np.sqrt(test_data                    + old_data)                  )
         assert np.allclose(histogram.out_range,         test_out_of_range[histoname] + old_out_of_range[histoname])
+
 
 # @mark.skip(reason="Delaying elimination of solid cities")
 @given   (histograms_lists())
@@ -368,6 +383,7 @@ def test_getitem_histomanager(histogram_list):
         assert             histogram_manager.histos[histoname].labels  == histogram_manager[histoname].labels
         assert             histogram_manager.histos[histoname].title   == histogram_manager[histoname].title
         assert             histogram_manager.histos[histoname].scale   == histogram_manager[histoname].scale
+
 
 # @mark.skip(reason="Delaying elimination of solid cities")
 @given(histograms_lists())

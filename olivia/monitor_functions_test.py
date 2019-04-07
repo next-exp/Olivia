@@ -11,12 +11,11 @@ from hypothesis.strategies   import floats
 from olivia          import monitor_functions   as monf
 from olivia          import histogram_functions as histf
 
-from invisible_cities. database             import load_db             as dbf
-from invisible_cities. core                 import system_of_units     as units
+from invisible_cities.database import load_db         as dbf
+from invisible_cities.core     import system_of_units as units
 
-from invisible_cities.evm.pmaps_test       import pmaps
-from invisible_cities.evm.pmaps_test       import sensor_responses
-
+from invisible_cities.evm .pmaps_test              import pmaps
+from invisible_cities.evm .pmaps_test              import sensor_responses
 from invisible_cities.reco.calib_sensors_functions import modes
 from invisible_cities.reco.calib_functions         import SensorType
 
@@ -35,28 +34,28 @@ def test_fill_pmap_var_1d(dbnew, pmaps):
     assert var_dict['S2_Number'][-1] == len(s2s)
 
     for i, speak in enumerate(s1s):
-        assert     var_dict['S1_Energy'][i] == speak.total_energy
-        assert     var_dict['S1_Width'] [i] == speak.width / units.mus
-        assert     var_dict['S1_Height'][i] == speak.height
-        assert     var_dict['S1_Charge'][i] == speak.total_charge
-        assert     var_dict['S1_Time']  [i] == speak.time_at_max_energy / units.mus
+        assert var_dict['S1_Energy'][i] == speak.total_energy
+        assert var_dict['S1_Width'] [i] == speak.width / units.mus
+        assert var_dict['S1_Height'][i] == speak.height
+        assert var_dict['S1_Charge'][i] == speak.total_charge
+        assert var_dict['S1_Time']  [i] == speak.time_at_max_energy / units.mus
 
     counter = 0
     for i, speak in enumerate(s2s):
-        assert     var_dict['S2_Energy']  [i] == speak.total_energy
-        assert     var_dict['S2_Width']   [i] == speak.width / units.mus
-        assert     var_dict['S2_Height']  [i] == speak.height
-        assert     var_dict['S2_Charge']  [i] == speak.total_charge
-        assert     var_dict['S2_Time']    [i] == speak.time_at_max_energy / units.mus
-        assert     var_dict['S2_SingleS1'][i] == len(s1s)
         nsipm = len(speak.sipms.ids)
-        assert     var_dict['S2_NSiPM']   [i] == nsipm
+        assert var_dict['S2_Energy']  [i] == speak.total_energy
+        assert var_dict['S2_Width']   [i] == speak.width / units.mus
+        assert var_dict['S2_Height']  [i] == speak.height
+        assert var_dict['S2_Charge']  [i] == speak.total_charge
+        assert var_dict['S2_Time']    [i] == speak.time_at_max_energy / units.mus
+        assert var_dict['S2_SingleS1'][i] == len(s1s)
+        assert var_dict['S2_NSiPM']   [i] == nsipm
         if len(s1s) == 1:
             assert var_dict['S2_SingleS1_Energy'][i] == s1s[0].total_energy
-        assert np.allclose(var_dict['S2_QSiPM'] [counter:counter + nsipm], speak.sipms.sum_over_times                  )
+        assert np.allclose(var_dict['S2_QSiPM' ][counter:counter + nsipm], speak.sipms.sum_over_times                  )
         assert np.allclose(var_dict['S2_IdSiPM'][counter:counter + nsipm], speak.sipms.ids                             )
-        assert np.allclose(var_dict['S2_XSiPM'] [counter:counter + nsipm], data_sipm.X.values[speak.sipms.ids].tolist())
-        assert np.allclose(var_dict['S2_YSiPM'] [counter:counter + nsipm], data_sipm.Y.values[speak.sipms.ids].tolist())
+        assert np.allclose(var_dict['S2_XSiPM' ][counter:counter + nsipm], data_sipm.X.values[speak.sipms.ids].tolist())
+        assert np.allclose(var_dict['S2_YSiPM' ][counter:counter + nsipm], data_sipm.Y.values[speak.sipms.ids].tolist())
         counter += nsipm
 
 
@@ -73,35 +72,37 @@ def test_fill_pmap_var_2d(dbnew, pmaps):
     monf.fill_pmap_var_2d(     var_dict, 'S2')
 
     for i, speak in enumerate(s1s):
-        assert var_dict['S1_Energy_S1_Width'] [0, i] == speak.total_energy
-        assert var_dict['S1_Energy_S1_Width'] [1, i] == speak.width / units.mus
+        assert var_dict['S1_Energy_S1_Width' ][0, i] == speak.total_energy
+        assert var_dict['S1_Energy_S1_Width' ][1, i] == speak.width / units.mus
         assert var_dict['S1_Energy_S1_Height'][0, i] == speak.total_energy
         assert var_dict['S1_Energy_S1_Height'][1, i] == speak.height
         assert var_dict['S1_Energy_S1_Charge'][0, i] == speak.total_energy
         assert var_dict['S1_Energy_S1_Charge'][1, i] == speak.total_charge
-        assert var_dict['S1_Time_S1_Energy']  [0, i] == speak.time_at_max_energy /units.mus
-        assert var_dict['S1_Time_S1_Energy']  [1, i] == speak.total_energy
+        assert var_dict['S1_Time_S1_Energy'  ][0, i] == speak.time_at_max_energy /units.mus
+        assert var_dict['S1_Time_S1_Energy'  ][1, i] == speak.total_energy
 
     counter = 0
     for i, speak in enumerate(s2s):
-        assert     var_dict['S2_Energy_S2_Width'] [0, i] == speak.total_energy
-        assert     var_dict['S2_Energy_S2_Width'] [1, i] == speak.width / units.mus
-        assert     var_dict['S2_Energy_S2_Height'][0, i] == speak.total_energy
-        assert     var_dict['S2_Energy_S2_Height'][1, i] == speak.height
-        assert     var_dict['S2_Energy_S2_Charge'][0, i] == speak.total_energy
-        assert     var_dict['S2_Energy_S2_Charge'][1, i] == speak.total_charge
-        assert     var_dict['S2_Time_S2_Energy']  [0, i] == speak.time_at_max_energy /units.mus
-        assert     var_dict['S2_Time_S2_Energy']  [1, i] == speak.total_energy
+        assert var_dict['S2_Energy_S2_Width' ][0, i] == speak.total_energy
+        assert var_dict['S2_Energy_S2_Width' ][1, i] == speak.width / units.mus
+        assert var_dict['S2_Energy_S2_Height'][0, i] == speak.total_energy
+        assert var_dict['S2_Energy_S2_Height'][1, i] == speak.height
+        assert var_dict['S2_Energy_S2_Charge'][0, i] == speak.total_energy
+        assert var_dict['S2_Energy_S2_Charge'][1, i] == speak.total_charge
+        assert var_dict['S2_Time_S2_Energy'  ][0, i] == speak.time_at_max_energy /units.mus
+        assert var_dict['S2_Time_S2_Energy'  ][1, i] == speak.total_energy
+
         if len(s1s) == 1:
             assert var_dict['S2_Energy_S1_Energy'][0, i] == speak.total_energy
             assert var_dict['S2_Energy_S1_Energy'][1, i] == s1s[0].total_energy
+
         sipm_ids = speak.sipms.ids
         assert np.allclose(var_dict['S2_XYSiPM'][0, counter:counter + len(sipm_ids)], data_sipm.X.values[speak.sipms.ids].tolist())
         assert np.allclose(var_dict['S2_XYSiPM'][1, counter:counter + len(sipm_ids)], data_sipm.Y.values[speak.sipms.ids].tolist())
         counter += len(sipm_ids)
 
 
-@given(pmaps(pmt_ids=np.arange(0,11,1)))
+@given(pmaps(pmt_ids=np.arange(0, 11, 1)))
 def test_fill_pmt_var(dbnew, pmaps):
     var_dict    = defaultdict(list)
     (_, s2s), _ = pmaps
@@ -178,18 +179,19 @@ def test_pmap_bins():
     assert_bins_and_labels_ndim('S2_Energy_S1_Energy', ['S2_Energy', 'S1_Energy'], out_bins, out_labels, test_bins, test_dict)
     assert_bins_and_labels_ndim('S2_XYSiPM'          , ['S2_XSiPM' , 'S2_YSiPM' ], out_bins, out_labels, test_bins, test_dict)
 
-    variable_names = ['S1_Energy', 'S1_Width', 'S1_Time', 'S2_Energy', 'S2_Time',
-                     'S2_Height', 'S1_Energy_S1_Width', 'S1_Time_S1_Energy',
-                     'S2_Time_S2_Energy', 'S2_Energy_S1_Energy', 'S2_Energy_S2_Height',
-                     'S2_XYSiPM']
+    variable_names = ['S1_Energy', 'S1_Width', 'S1_Time', 'S2_Energy', 'S2_Time', 'S2_Height',
+                      'S1_Energy_S1_Width', 'S1_Time_S1_Energy', 'S2_Time_S2_Energy',
+                      'S2_Energy_S1_Energy', 'S2_Energy_S2_Height', 'S2_XYSiPM']
 
     for i in range(test_dict['nPMT']):
         energy_name = f'PMT{i}_S2_Energy'
         height_name = f'PMT{i}_S2_Height'
         time_name   = f'PMT{i}_S2_Time'
+
         variable_names.append(energy_name)
         variable_names.append(height_name)
         variable_names.append(  time_name)
+
         assert out_labels[energy_name] == [f'PMT{i} ' + test_dict['S2_Energy_labels'][0]]
         assert out_labels[height_name] == [f'PMT{i} ' + test_dict['S2_Height_labels'][0]]
         assert out_labels[  time_name] == [f'PMT{i} ' + test_dict['S2_Time_labels'  ][0]]
@@ -308,21 +310,21 @@ def test_rwf_bins():
                  'Raw_ADC_counts_bins'     : [0   , 4096, 4096],
 
 
-                 'PMT_Baseline_labels'     : ["ADCs"]           ,
-                 'PMT_BaselineRMS_labels'  : ["ADCs"]           ,
-                 'PMT_nSensors_labels'     : ["Number of PMTs"] ,
-                 'SIPM_Baseline_labels'    : ["ADCs"]           ,
-                 'SIPM_BaselineRMS_labels' : ["ADCs"]           ,
+                 'PMT_Baseline_labels'     : ["ADCs"           ],
+                 'PMT_BaselineRMS_labels'  : ["ADCs"           ],
+                 'PMT_nSensors_labels'     : ["Number of PMTs" ],
+                 'SIPM_Baseline_labels'    : ["ADCs"           ],
+                 'SIPM_BaselineRMS_labels' : ["ADCs"           ],
                  'SIPM_nSensors_labels'    : ["Number of SIPMs"],
-                 'Raw_ADC_counts_labels'   : [""]               ,
+                 'Raw_ADC_counts_labels'   : [""               ],
 
-                 'PMT_Baseline_scales'     : [ "linear" ]       ,
-                 'PMT_BaselineRMS_scales'  : [ "linear" ]       ,
-                 'PMT_nSensors_scales'     : [ "linear" ]       ,
-                 'SIPM_Baseline_scales'    : [ "linear" ]       ,
-                 'SIPM_BaselineRMS_scales' : [ "linear" ]       ,
-                 'SIPM_nSensors_scales'    : [ "linear" ]       ,
-                 'Raw_ADC_counts_scales'   : [ "log"    ]       ,
+                 'PMT_Baseline_scales'     : [ "linear"        ],
+                 'PMT_BaselineRMS_scales'  : [ "linear"        ],
+                 'PMT_nSensors_scales'     : [ "linear"        ],
+                 'SIPM_Baseline_scales'    : [ "linear"        ],
+                 'SIPM_BaselineRMS_scales' : [ "linear"        ],
+                 'SIPM_nSensors_scales'    : [ "linear"        ],
+                 'Raw_ADC_counts_scales'   : [ "log"           ],
 
                  'n_PMTs'                  : 12,
                  'n_baseline'              : 10000 }
@@ -330,39 +332,41 @@ def test_rwf_bins():
     out_bins, out_labels, out_scales, out_baseline = monf.rwf_bins(test_dict)
 
     bins = test_dict['PMT_Baseline_bins']
-    assert     np.allclose(out_bins['PMT_Baseline']    , [np.linspace(bins[0], bins[1], bins[2] + 1)])
+    assert np.allclose(out_bins['PMT_Baseline'    ], [np.linspace(bins[0], bins[1], bins[2] + 1)])
     bins = test_dict['PMT_BaselineRMS_bins']
-    assert     np.allclose(out_bins['PMT_BaselineRMS'] , [np.linspace(bins[0], bins[1], bins[2] + 1)])
+    assert np.allclose(out_bins['PMT_BaselineRMS' ], [np.linspace(bins[0], bins[1], bins[2] + 1)])
     bins = test_dict['PMT_nSensors_bins']
-    assert     np.allclose(out_bins['PMT_nSensors']    , [np.linspace(bins[0], bins[1], bins[2] + 1)])
+    assert np.allclose(out_bins['PMT_nSensors'    ], [np.linspace(bins[0], bins[1], bins[2] + 1)])
     bins = test_dict['SIPM_Baseline_bins']
-    assert     np.allclose(out_bins['SIPM_Baseline']   , [np.linspace(bins[0], bins[1], bins[2] + 1)])
+    assert np.allclose(out_bins['SIPM_Baseline'   ], [np.linspace(bins[0], bins[1], bins[2] + 1)])
     bins = test_dict['SIPM_BaselineRMS_bins']
-    assert     np.allclose(out_bins['SIPM_BaselineRMS'], [np.linspace(bins[0], bins[1], bins[2] + 1)])
+    assert np.allclose(out_bins['SIPM_BaselineRMS'], [np.linspace(bins[0], bins[1], bins[2] + 1)])
     bins = test_dict['SIPM_nSensors_bins']
-    assert     np.allclose(out_bins['SIPM_nSensors']   , [np.linspace(bins[0], bins[1], bins[2] + 1)])
+    assert np.allclose(out_bins['SIPM_nSensors'   ], [np.linspace(bins[0], bins[1], bins[2] + 1)])
     bins = test_dict['Raw_ADC_counts_bins']
+
     for i in range(0, int(test_dict['n_PMTs'])):
         assert np.allclose(out_bins[f'PMT{i}_ADCs'], [np.linspace(bins[0], bins[1], bins[2] + 1)])
 
-    assert     out_labels['PMT_Baseline']    [0] == test_dict['PMT_Baseline_labels']    [0]
-    assert     out_labels['PMT_BaselineRMS'] [0] == test_dict['PMT_BaselineRMS_labels'] [0]
-    assert     out_labels['PMT_nSensors']    [0] == test_dict['PMT_nSensors_labels']    [0]
-    assert     out_labels['SIPM_Baseline']   [0] == test_dict['SIPM_Baseline_labels']   [0]
-    assert     out_labels['SIPM_BaselineRMS'][0] == test_dict['SIPM_BaselineRMS_labels'][0]
-    assert     out_labels['SIPM_nSensors']   [0] == test_dict['SIPM_nSensors_labels']   [0]
+    assert out_labels['PMT_Baseline'    ][0] == test_dict['PMT_Baseline_labels'    ][0]
+    assert out_labels['PMT_BaselineRMS' ][0] == test_dict['PMT_BaselineRMS_labels' ][0]
+    assert out_labels['PMT_nSensors'    ][0] == test_dict['PMT_nSensors_labels'    ][0]
+    assert out_labels['SIPM_Baseline'   ][0] == test_dict['SIPM_Baseline_labels'   ][0]
+    assert out_labels['SIPM_BaselineRMS'][0] == test_dict['SIPM_BaselineRMS_labels'][0]
+    assert out_labels['SIPM_nSensors'   ][0] == test_dict['SIPM_nSensors_labels'   ][0]
+
     for i in range(0, int(test_dict['n_PMTs'])):
         assert out_labels[f'PMT{i}_ADCs'][0] == f"PMT{i}_Raw_ADC_counts"
 
-    assert     out_scales['PMT_Baseline']    [0] == test_dict['PMT_Baseline_scales']    [0]
-    assert     out_scales['PMT_BaselineRMS'] [0] == test_dict['PMT_BaselineRMS_scales'] [0]
-    assert     out_scales['PMT_nSensors']    [0] == test_dict['PMT_nSensors_scales']    [0]
-    assert     out_scales['SIPM_Baseline']   [0] == test_dict['SIPM_Baseline_scales']   [0]
-    assert     out_scales['SIPM_BaselineRMS'][0] == test_dict['SIPM_BaselineRMS_scales'][0]
-    assert     out_scales['SIPM_nSensors']   [0] == test_dict['SIPM_nSensors_scales']   [0]
+    assert out_scales['PMT_Baseline'    ][0] == test_dict['PMT_Baseline_scales'    ][0]
+    assert out_scales['PMT_BaselineRMS' ][0] == test_dict['PMT_BaselineRMS_scales' ][0]
+    assert out_scales['PMT_nSensors'    ][0] == test_dict['PMT_nSensors_scales'    ][0]
+    assert out_scales['SIPM_Baseline'   ][0] == test_dict['SIPM_Baseline_scales'   ][0]
+    assert out_scales['SIPM_BaselineRMS'][0] == test_dict['SIPM_BaselineRMS_scales'][0]
+    assert out_scales['SIPM_nSensors'   ][0] == test_dict['SIPM_nSensors_scales'   ][0]
+
     for i in range(0, int(test_dict['n_PMTs'])):
         assert out_scales[f'PMT{i}_ADCs'][0] == test_dict['Raw_ADC_counts_scales'][0]
-
     assert out_baseline                      == test_dict['n_baseline']
 
 
@@ -373,32 +377,30 @@ def test_fill_rwf_histos(OLIVIADATADIR):
                         'SIPM_Baseline_bins'      : [     0,    100,  100],
                         'SIPM_BaselineRMS_bins'   : [     0,     10,  100],
                         'SIPM_nSensors_bins'      : [1750.5, 1800.5,   50],
-                        'Raw_ADC_counts_bins'     : [0   , 4096, 4096]    ,
+                        'Raw_ADC_counts_bins'     : [     0,   4096, 4096],
 
-                        'PMT_Baseline_labels'     : ["PMT Baseline (ADC)"]     ,
-                        'PMT_BaselineRMS_labels'  : ["PMT Baseline RMS (ADC)"] ,
-                        'PMT_nSensors_labels'     : ["Number of PMTs"]         ,
-                        'SIPM_Baseline_labels'    : ["SIPM Baseline (ADC)"]    ,
+                        'PMT_Baseline_labels'     : ["PMT Baseline (ADC)"     ],
+                        'PMT_BaselineRMS_labels'  : ["PMT Baseline RMS (ADC)" ],
+                        'PMT_nSensors_labels'     : ["Number of PMTs"         ],
+                        'SIPM_Baseline_labels'    : ["SIPM Baseline (ADC)"    ],
                         'SIPM_BaselineRMS_labels' : ["SIPM Baseline RMS (ADC)"],
-                        'SIPM_nSensors_labels'    : ["Number of SIPMs"]        ,
-                        'Raw_ADC_counts_labels'   : [""]                       ,
+                        'SIPM_nSensors_labels'    : ["Number of SIPMs"        ],
+                        'Raw_ADC_counts_labels'   : [""                       ],
 
-                        'PMT_Baseline_scales'     : [ "linear" ]       ,
-                        'PMT_BaselineRMS_scales'  : [ "linear" ]       ,
-                        'PMT_nSensors_scales'     : [ "linear" ]       ,
-                        'SIPM_Baseline_scales'    : [ "linear" ]       ,
-                        'SIPM_BaselineRMS_scales' : [ "linear" ]       ,
-                        'SIPM_nSensors_scales'    : [ "linear" ]       ,
-                        'Raw_ADC_counts_scales'   : [ "log"    ]       ,
+                        'PMT_Baseline_scales'     : [ "linear"                ],
+                        'PMT_BaselineRMS_scales'  : [ "linear"                ],
+                        'PMT_nSensors_scales'     : [ "linear"                ],
+                        'SIPM_Baseline_scales'    : [ "linear"                ],
+                        'SIPM_BaselineRMS_scales' : [ "linear"                ],
+                        'SIPM_nSensors_scales'    : [ "linear"                ],
+                        'Raw_ADC_counts_scales'   : [ "log"                   ],
 
                         'n_PMTs'                  : 12,
                         'n_baseline'              : 48000}
 
-    test_infile = "irene_bug_Kr_ACTIVE_7bar_RWF.h5"
-    test_infile = os.path.join(OLIVIADATADIR, test_infile)
-
-    test_histo = monf.fill_rwf_histos(test_infile, test_config_dict)
-
+    test_infile    = "irene_bug_Kr_ACTIVE_7bar_RWF.h5"
+    test_infile    = os.path.join(OLIVIADATADIR, test_infile)
+    test_histo     = monf.fill_rwf_histos(test_infile, test_config_dict)
     test_checkfile = "irene_bug_Kr_ACTIVE_7bar_RWF_histos.h5"
     test_checkfile = os.path.join(OLIVIADATADIR, test_checkfile)
     check_histo    = histf.get_histograms_from_file(test_checkfile)
@@ -413,6 +415,7 @@ def test_fill_rwf_histos(OLIVIADATADIR):
         assert             v.title   == test_histo.histos[k].title
         assert             v.labels  == test_histo.histos[k].labels
         assert             v.scale   == test_histo.histos[k].scale
+        
         for i, bins in enumerate(v.bins):
             assert np.allclose(bins,    test_histo.histos[k].bins[i])
 

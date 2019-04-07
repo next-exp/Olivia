@@ -8,7 +8,6 @@ from hypothesis             import settings
 from hypothesis.strategies  import lists
 
 from pytest import mark
-
 from olivia import histogram_functions as histf
 
 from olivia.hist_io         import save_histomanager_to_file
@@ -88,9 +87,9 @@ def test_create_histomanager_from_dicts(bins):
     histoscales_dict = {}
     histograms_dict  = {}
     for i, bins_element in enumerate(bins):
-        title =    f"Histo_{i}"
-        labels = [ f"Xlabel_{i}", f"Ylabel_{i}" ]
-        scales = [ "linear" ]
+        title =   f"Histo_{i}"
+        labels = [f"Xlabel_{i}", f"Ylabel_{i}"]
+        scales = ["linear"]
         histobins_dict  [title] = bins_element
         histolabels_dict[title] = labels
         histoscales_dict[title] = scales
@@ -113,8 +112,8 @@ def test_join_histograms_from_file(output_tmpdir, histogram_list1, histogram_lis
     histogram_manager2       = HistoManager(list_of_histograms2)
 
     file_out1 = os.path.join(output_tmpdir, 'test_save_histogram_manager_1.h5')
-    save_histomanager_to_file(histogram_manager1, file_out1)
     file_out2 = os.path.join(output_tmpdir, 'test_save_histogram_manager_2.h5')
+    save_histomanager_to_file(histogram_manager1, file_out1)
     save_histomanager_to_file(histogram_manager2, file_out2)
 
     joined_histogram_manager1 = histf.join_histograms_from_files([file_out1, file_out2])
@@ -129,8 +128,8 @@ def test_join_histograms_from_file(output_tmpdir, histogram_list1, histogram_lis
 @given   (histograms_lists())
 @settings(deadline=None, max_examples=250)
 def test_join_histograms_from_file_and_write(output_tmpdir, histogram_list):
-    _, list_of_histograms   = histogram_list
-    histogram_manager       = HistoManager(list_of_histograms)
+    _, list_of_histograms = histogram_list
+    histogram_manager     = HistoManager(list_of_histograms)
 
     file_out_test = os.path.join(output_tmpdir , 'test_save_histogram_manager_1.h5')
     save_histomanager_to_file(histogram_manager, file_out_test)

@@ -43,7 +43,7 @@ def hist_writer_var(file, *, compression='ZLIB4'):
                    out_of_range: 'np.array lenght=2 with events out of range',
                    errors      : 'np.array with bins uncertainties'          ,
                    labels      : 'list with labels of the histogram'         ,
-                   scales      : 'list with the scales of the histogram'      ):
+                   scales      : 'list with the scales of the histogram'     ):
 
         try:                       hist_group = getattr          (file.root, group_name)
         except tb.NoSuchNodeError: hist_group = file.create_group(file.root, group_name)
@@ -75,14 +75,16 @@ def hist_writer_var(file, *, compression='ZLIB4'):
 
 
 def save_histomanager_to_file(histogram_manager, file_out, mode='w', group='HIST'):
-    """
-    Saves the HistoManager and its contained Histograms to a file.
+    """Saves the HistoManager and its contained histograms to a file.
 
-    Arguments:
-    file_out = String with the path of the file were the HistoManager will
-               be written.
-    mode     = Writting mode. By default a new file will be created.
-    group    = Group name to save the histograms in the file.
+    Parameters
+    ----------
+    file_out : str
+    Path of the file were the HistoManager will be written.
+    mode     : str, optional
+    Writting mode. By default a new file will be created.
+    group    : string, optional
+    Group name to save the histograms in the file.
     """
     if mode not in 'wa':
         raise ValueError(f"Incompatible mode ({mode}) of writting, please use 'w' (write) or 'a' (append).")
@@ -116,7 +118,7 @@ def get_histograms_from_file(file_input, group_name='HIST'):
             labels    =          getattr(group, histoname + '_labels'  )[:]
             labels    = [str(lab)[2:-1].replace('\\\\', '\\') for lab in labels]
             try:
-                scale     =          getattr(group, histoname + '_scales'  )[:]
+                scale     =      getattr(group, histoname + '_scales'  )[:]
                 scale     = [str(scl)[2:-1].replace('\\\\', '\\') for scl in scale]
             except tb.NoSuchNodeError:
                 scale     = ["linear"]
