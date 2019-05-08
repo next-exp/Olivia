@@ -1,40 +1,64 @@
-from .. io   .hist_io        import save_histomanager_to_file
-from .. io   .hist_io        import get_histograms_from_file
-from .. evm  .histos         import Histogram
-from .. evm  .histos         import HistoManager
+from olivia.hist_io import save_histomanager_to_file
+from olivia.hist_io import get_histograms_from_file
+from olivia.histos  import Histogram
+from olivia.histos  import HistoManager
 
 
-def create_histomanager_from_dicts(histobins_dict, histolabels_dict, init_fill_dict=None):
-    """
-    Creates and returns an HistoManager from a dict of bins and a given of labels with identical keys.
+def create_histomanager_from_dicts(histobins_dict,
+                                   histolabels_dict,
+                                   histoscales_dict,
+                                   init_fill_dict=None):
+    """Creates and returns a HistoManager from a dict of bins
+    and a given of labels with identical keys.
 
-    Arguments:
-    histobins_dict   = Dictionary with keys equal to Histogram names and values equal to the binning.
-    histolabels_dict = Dictionary with keys equal to Histogram names and values equal to the axis labels.
-    init_fill_dict   = Dictionary with keys equal to Histogram names and values equal to an initial filling.
+    Parameters
+    ----------
+    histobins_dict   : dict
+    Dictionary with keys equal to histogram names
+    and values equal to the binning.
+    histolabels_dict : dict
+    Dictionary with keys equal to histogram names 
+    and values equal to the axis labels.
+    histoscales_dict : dict
+    Dictionary with keys equal to histogram names 
+    and values equal to the y axis scale.
+    init_fill_dict   : dict, optional
+    Dictionary with keys equal to histogram names 
+    and values equal to an initial filling.
     """
     histo_manager = HistoManager()
-    if init_fill_dict is None: init_fill_dict = dict()
-    for histotitle, histobins in histobins_dict.items():
-        histo_manager.new_histogram(Histogram(histotitle,
-                                              histobins,
-                                              histolabels_dict[histotitle],
-                                              init_fill_dict.get(histotitle, None)))
+    if init_fill_dict is None:
+        init_fill_dict = dict()
+
+    for title, bins in histobins_dict.items():
+        histo_manager.new_histogram(Histogram(title, bins,
+                                              histolabels_dict [title],
+                                              histoscales_dict [title],
+                                              init_fill_dict.get(title, None)))
     return histo_manager
 
 
-def join_histograms_from_files(histofiles, group_name='HIST', join_file=None, write_mode='w'):
-    """
-    Joins the histograms of a given list of histogram files. If possible,
-    Histograms with the same name will be added.
-
-    histofiles = List of strings with the filenames to be summed.
-    join_file  = String. If passed, saves the resulting HistoManager to this path.
+def join_histograms_from_files(histofiles,
+                               group_name = 'HIST',
+                               join_file  =   None,
+                               write_mode =    'w'):
+    """Joins the histograms of a given list of histogram files.
+    If possible, histograms with the same name will be added.
+    
+    Parameters
+    ----------
+    histofiles : sequence
+    List of strings with the filenames to be summed.
+    group_name : string, optional
+    Name of the histogram group in the file.
+    join_file  : string, optional
+    If passed, saves the resulting HistoManager to this path.
     """
     if not histofiles:
         raise ValueError("List of files is empty")
 
-    final_histogram_manager = get_histograms_from_file(histofiles[0], group_name)
+    final_histogram_manager = get_histograms_from_file(histofiles[0],
+                                                       group_name)
 
     for file in histofiles[1:]:
         added_histograms        = get_histograms_from_file(file, group_name)
@@ -47,11 +71,12 @@ def join_histograms_from_files(histofiles, group_name='HIST', join_file=None, wr
 
 
 def join_histo_managers(histo_manager1, histo_manager2):
-    """
-    Joins two HistoManager. If they share histograms, the histograms are sumed.
+    """Joins two HistoManager.
+    If they share histograms, the histograms are sumed.
 
-    Arguments:
-    histo_manager1, histo_manager2 = HistoManager objects to be joined.
+    Parameters
+    ----------
+    histo_manager1, histo_manager2 : HistoManager objects to be joined.
     """
     new_histogram_manager = HistoManager()
     list_of_histograms    = set(histo_manager1.histos) | set(histo_manager2.histos)

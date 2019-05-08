@@ -21,16 +21,16 @@ from hypothesis.strategies  import lists
 from hypothesis.strategies  import sampled_from
 from hypothesis.strategies  import one_of
 
-from .. evm.histos          import HistoManager, Histogram
-from .. io .hist_io         import save_histomanager_to_file
-from .. io .hist_io         import get_histograms_from_file
-from .. evm.histos_test     import histograms_lists
-from .. evm.histos_test     import assert_histogram_equality
+from olivia.histos          import HistoManager, Histogram
+from olivia.hist_io         import save_histomanager_to_file
+from olivia.hist_io         import get_histograms_from_file
+from olivia.histos_test     import histograms_lists
+from olivia.histos_test     import assert_histogram_equality
 
 
 letters    = string.ascii_letters
 
-@mark.skip(reason="Delaying elimination of solid cities")
+# @mark.skip(reason="Delaying elimination of solid cities")
 @given   (histograms_lists(), text(letters, min_size=1))
 @settings(deadline=None, max_examples=400)
 def test_save_histomanager_to_file_write_mode(output_tmpdir, histogram_list, group):
@@ -46,6 +46,7 @@ def test_save_histomanager_to_file_write_mode(output_tmpdir, histogram_list, gro
         for histogram in list_of_histograms:
             histoname    = histogram.title
             saved_labels = [str(label)[2:-1].replace('\\\\', '\\') for label in getattr(file_group, histoname + "_labels")[:]]
+            saved_scales = [str(label)[2:-1].replace('\\\\', '\\') for label in getattr(file_group, histoname + "_scales")[:]]
 
             assert histoname in file_group
             assert                                len(histogram.bins) == len(getattr(file_group, histoname + "_bins")[:])
@@ -54,9 +55,10 @@ def test_save_histomanager_to_file_write_mode(output_tmpdir, histogram_list, gro
             assert np.allclose(histogram.errors   , getattr(file_group, histoname + "_errors"  )[:])
             assert np.allclose(histogram.out_range, getattr(file_group, histoname + "_outRange")[:])
             assert             histogram.labels  == saved_labels
+            assert             histogram.scale   == saved_scales
 
 
-@mark.skip(reason="Delaying elimination of solid cities")
+# @mark.skip(reason="Delaying elimination of solid cities")
 @given   (histograms_lists(), text(letters, min_size=1))
 @settings(deadline=None, max_examples=400)
 def test_save_histomanager_to_file_append_mode(output_tmpdir, histogram_list, group):
@@ -74,6 +76,7 @@ def test_save_histomanager_to_file_append_mode(output_tmpdir, histogram_list, gr
         for histogram in list_of_histograms:
             histoname    = histogram.title
             saved_labels = [str(label)[2:-1].replace('\\\\', '\\') for label in getattr(file_group, histoname + "_labels")[:]]
+            saved_scales = [str(label)[2:-1].replace('\\\\', '\\') for label in getattr(file_group, histoname + "_scales")[:]]
 
             assert histoname in file_group
             assert                                len(histogram.bins) == len(getattr(file_group, histoname + "_bins")[:])
@@ -82,9 +85,10 @@ def test_save_histomanager_to_file_append_mode(output_tmpdir, histogram_list, gr
             assert np.allclose(histogram.errors   , getattr(file_group, histoname + "_errors"  )[:])
             assert np.allclose(histogram.out_range, getattr(file_group, histoname + "_outRange")[:])
             assert             histogram.labels  == saved_labels
+            assert             histogram.scale   == saved_scales
 
 
-@mark.skip(reason="Delaying elimination of solid cities")
+# @mark.skip(reason="Delaying elimination of solid cities")
 @given   (histograms_lists(), text(letters, min_size=1), text(letters, min_size=1, max_size=1).filter(lambda x: x not in 'wa'))
 @settings(deadline=None)
 def test_save_histomanager_to_file_raises_ValueError(output_tmpdir, histogram_list, group, write_mode):
@@ -97,7 +101,7 @@ def test_save_histomanager_to_file_raises_ValueError(output_tmpdir, histogram_li
         save_histomanager_to_file(histogram_manager, file_out, mode=write_mode, group=group)
 
 
-@mark.skip(reason="Delaying elimination of solid cities")
+# @mark.skip(reason="Delaying elimination of solid cities")
 @given(histograms_lists())
 @settings(deadline=None, max_examples=400)
 def test_get_histograms_from_file(output_tmpdir, histogram_list):
