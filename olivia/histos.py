@@ -1,7 +1,7 @@
 import numpy  as np
 import tables as tb
 
-from invisible_cities.reco  import tbl_functions as tbl
+from invisible_cities.reco import tbl_functions as tbl
 
 
 class Histogram:
@@ -82,14 +82,16 @@ class Histogram:
         data_weights : np.array
         Weights for the data points.
         """
-        binned_data, *_ = np.histogramdd(data.T, self.bins, weights=data_weights)
+        binned_data, *_ = np.histogramdd(data.T, self.bins,
+                                         weights=data_weights)
         out_of_range    = self.count_out_of_range(np.array(data, ndmin=2))
 
         return binned_data, out_of_range
 
     def count_out_of_range(self, data):
-        """Returns an array with the number of events out of the Histogram's bin
-        range of the given data.
+        """
+        Returns an array with the number of events out of the
+        Histogram's bin range of the given data.
 
         Parameters
         ----------
@@ -104,8 +106,10 @@ class Histogram:
         return np.asarray(out_of_range).T
 
     def update_errors(self, errors=None):
-        """Updates the errors with the passed list/array. If nothing is passed,
-        the square root of the counts is computed and assigned as error.
+        """
+        Updates the errors with the passed list/array.
+        If nothing is passed, the square root of the
+        counts is computed and assigned as error.
 
         Parameters
         ----------
@@ -130,7 +134,8 @@ class Histogram:
         if self.labels != other.labels:
             print(f"""Warning: Histogram titles are different.
                       {self.labels}, {other.labels}""")
-        new_histogram           = Histogram(self.title, self.bins, self.labels, self.scale)
+        new_histogram           = Histogram(self.title, self.bins,
+                                            self.labels, self.scale)
         new_histogram.data      =           self.data        + other.data
         new_histogram.out_range =           self.out_range   + other.out_range
         new_histogram.errors    = np.sqrt  (self.errors ** 2 + other.errors ** 2)
@@ -140,7 +145,8 @@ class Histogram:
 
 class HistoManager:
     def __init__(self, histograms=None):
-        """This class is a parameter holder that contains
+        """
+        This class is a parameter holder that contains
         a dictionary of Histogram objects.
 
         Attributes

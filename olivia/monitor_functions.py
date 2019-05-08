@@ -8,7 +8,6 @@ from olivia        import histogram_functions as histf
 from olivia.histos import        HistoManager
 
 from invisible_cities.database import         load_db as   dbf
-
 from invisible_cities.core     import system_of_units as units
 
 from invisible_cities.io  .pmaps_io                import      load_pmaps
@@ -123,6 +122,7 @@ def fill_pmap_var_1d(speaks, var_dict, ptype, DataSiPM=None):
 
             sipm_ids = speak.sipms.ids
             sipm_Q   = speak.sipms.sum_over_times
+            
             var_dict    [ptype + '_NSiPM' ].append(len(sipm_ids))
             var_dict    [ptype + '_QSiPM' ].extend(sipm_Q)
             var_dict    [ptype + '_IdSiPM'].extend(sipm_ids)
@@ -198,7 +198,9 @@ def fill_pmap_histos(in_path, detector_db, run_number, config_dict):
     Contains the configuration parameters (bins, labels).
     """
     var_bins, var_labels, var_scales = pmap_bins(config_dict)
-    histo_manager        = histf.create_histomanager_from_dicts(var_bins, var_labels, var_scales)
+    histo_manager        = histf.create_histomanager_from_dicts(var_bins  ,
+                                                                var_labels,
+                                                                var_scales)
     SiPM_db              = dbf.DataSiPM(detector_db, run_number)
 
     for in_file in glob.glob(in_path):
