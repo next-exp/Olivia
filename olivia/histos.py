@@ -25,9 +25,9 @@ class Histogram:
         Assigned uncertanties to each bin.
         labels    : sequence
         Axis labels.
-        scale     : string
+        scale     : str
         Scale of the y axis. This can take one of the
-        scale values allowed by matplotlib: linear, log, ...
+        scale values allowed by matplotlib: linear, log ...
 
         Parameters
         ----------
