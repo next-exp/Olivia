@@ -20,7 +20,7 @@ def olivia(conf):
     file_out     = os.path.expandvars(conf.file_out)
     detector_db  =                    conf.detector_db
     run_number   =                int(conf.run_number)
-    histo_config =                    conf.histo_config
+    histo_config = os.path.expandvars(conf.histo_config)
 
     try:
         data_type = InputDataType[conf.data_type]
