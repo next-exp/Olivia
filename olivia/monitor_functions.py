@@ -240,7 +240,7 @@ def rwf_bins(config_dict):
     return var_bins, var_labels, var_scales, config_dict['n_baseline']
 
 
-def fill_rwf_var(rwf, var_dict, sensor_type):
+def fill_rwf_var(rwfs, var_dict, sensor_type):
     """Fills a passed dictionary of lists with the rwf variables to monitor.
 
     Parameters
@@ -254,10 +254,17 @@ def fill_rwf_var(rwf, var_dict, sensor_type):
     """
 
     if   sensor_type is SensorType.SIPM:
-        bls = modes(rwf.astype("int16")).flatten()
+        bls = modes(rwfs.astype("int16")).flatten()
+        sipms_rms = []
+        for rwf in rwfs:
+            if len(rwf>0):
+                sipms_rms.append(np.std(rwf[rwf>0], axis=1))
+            else:
+                sipms_rms.append(0.)
+        rms = np.array(sipms_rms)
     elif sensor_type is SensorType.PMT:
-        bls = np.mean(rwf, axis=1)
-    rms = np.std(rwf[:, :int(0.4*len(rwf[0]))], axis=1)
+        bls = np.mean(rwfs, axis=1)
+        rms = np.std(rwfs[:, :int(0.4*len(rwfs[0]))], axis=1)
 
     var_dict[sensor_type.name + '_Baseline']   .extend(bls)
     var_dict[sensor_type.name + '_BaselineRMS'].extend(rms)
@@ -265,8 +272,8 @@ def fill_rwf_var(rwf, var_dict, sensor_type):
 
     #PMT_#_ACD plots
     if sensor_type is SensorType.PMT:
-        for i in range(0, len(rwf)):
-            var_dict[f'PMT{i}_ADCs'].extend(rwf[i])
+        for i in range(0, len(rwfs)):
+            var_dict[f'PMT{i}_ADCs'].extend(rwfs[i])
 
 
 def fill_rwf_histos(in_path, config_dict):
