@@ -255,13 +255,7 @@ def fill_rwf_var(rwfs, var_dict, sensor_type):
 
     if   sensor_type is SensorType.SIPM:
         bls = modes(rwfs.astype("int16")).flatten()
-        sipms_rms = []
-        for rwf in rwfs:
-            if len(rwf>0):
-                sipms_rms.append(np.std(rwf[rwf>0], axis=1))
-            else:
-                sipms_rms.append(0.)
-        rms = np.array(sipms_rms)
+        rms = [np.std(rwf[rwf>0][:int(0.4*len(rwf))]) for rwf in rwfs if len(rwf[rwf>0])]
     elif sensor_type is SensorType.PMT:
         bls = np.mean(rwfs, axis=1)
         rms = np.std(rwfs[:, :int(0.4*len(rwfs[0]))], axis=1)
