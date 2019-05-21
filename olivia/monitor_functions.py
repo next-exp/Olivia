@@ -257,7 +257,7 @@ def fill_rwf_var(rwf, var_dict, sensor_type):
         bls = modes(rwf.astype("int16")).flatten()
     elif sensor_type is SensorType.PMT:
         bls = np.mean(rwf, axis=1)
-    rms = np.std (rwf, axis=1)
+    rms = np.std(rwf[:, :int(0.4*len(rwf[0]))], axis=1)
 
     var_dict[sensor_type.name + '_Baseline']   .extend(bls)
     var_dict[sensor_type.name + '_BaselineRMS'].extend(rms)
