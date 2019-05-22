@@ -295,9 +295,10 @@ def test_fill_rwf_var():
     monf.fill_rwf_var(sipm_waveforms, var_dict, SensorType.SIPM)
 
     assert np.allclose(var_dict['PMT_Baseline']    , np.mean( pmt_waveforms, axis=1))
-    assert np.allclose(var_dict['PMT_BaselineRMS'] , np.std ( pmt_waveforms, axis=1))
+    assert np.allclose(var_dict['PMT_BaselineRMS'] , np.std ( pmt_waveforms[:, :int(0.4*len(pmt_waveforms[0]))], axis=1))
     assert np.allclose(var_dict['SIPM_Baseline']   , modes  (sipm_waveforms.astype("int16")).flatten())
-    assert np.allclose(var_dict['SIPM_BaselineRMS'], np.std (sipm_waveforms, axis=1))
+    rwfs = sipm_waveforms
+    assert np.allclose(var_dict['SIPM_BaselineRMS'], [np.std(rwf[rwf>0][:int(0.4*len(rwf))]) for rwf in rwfs if len(rwf[rwf>0])])
 
 
 def test_rwf_bins():
@@ -371,13 +372,13 @@ def test_rwf_bins():
 
 
 def test_fill_rwf_histos(OLIVIADATADIR):
-    test_config_dict = {'PMT_Baseline_bins'       : [  2300,   2700,  400],
-                        'PMT_BaselineRMS_bins'    : [     0,     10,  100],
+    test_config_dict = {'PMT_Baseline_bins'       : [  2500,   4000,  400],
+                        'PMT_BaselineRMS_bins'    : [     0,     30,  100],
                         'PMT_nSensors_bins'       : [  -0.5,   12.5,   13],
                         'SIPM_Baseline_bins'      : [     0,    100,  100],
-                        'SIPM_BaselineRMS_bins'   : [     0,     10,  100],
+                        'SIPM_BaselineRMS_bins'   : [     0,     40,  100],
                         'SIPM_nSensors_bins'      : [1750.5, 1800.5,   50],
-                        'Raw_ADC_counts_bins'     : [     0,   4096, 4096],
+                        'Raw_ADC_counts_bins'     : [  1000,   4096,  100],
 
                         'PMT_Baseline_labels'     : ["PMT Baseline (ADC)"     ],
                         'PMT_BaselineRMS_labels'  : ["PMT Baseline RMS (ADC)" ],
@@ -396,7 +397,7 @@ def test_fill_rwf_histos(OLIVIADATADIR):
                         'Raw_ADC_counts_scales'   : [ "log"                   ],
 
                         'n_PMTs'                  : 12,
-                        'n_baseline'              : 48000}
+                        'n_baseline'              : 64000}
 
     test_infile    = "irene_bug_Kr_ACTIVE_7bar_RWF.h5"
     test_infile    = os.path.join(OLIVIADATADIR, test_infile)
@@ -415,7 +416,7 @@ def test_fill_rwf_histos(OLIVIADATADIR):
         assert             v.title   == test_histo.histos[k].title
         assert             v.labels  == test_histo.histos[k].labels
         assert             v.scale   == test_histo.histos[k].scale
-        
+
         for i, bins in enumerate(v.bins):
             assert np.allclose(bins,    test_histo.histos[k].bins[i])
 
