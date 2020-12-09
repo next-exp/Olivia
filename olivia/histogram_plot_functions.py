@@ -5,7 +5,7 @@ from olivia.hist_io import get_histograms_from_file
 from olivia.histos  import Histogram
 from olivia.histos  import HistoManager
 
-from invisible_cities.icaro.hst_functions  import shift_to_bin_centers
+from invisible_cities.core.core_functions  import shift_to_bin_centers
 from invisible_cities.core .core_functions import weighted_mean_and_std
 
 
@@ -15,9 +15,9 @@ def plot_histograms_from_file(histofile,
                               plot_errors     =  False,
                               out_path        =   None,
                               reference_histo =   None):
-    """Plots the Histograms of a given file containing 
+    """Plots the Histograms of a given file containing
     a HistoManager in a 3 column plot grid.
-        
+
     Parameters
     ----------
     histofile       : string
@@ -30,7 +30,7 @@ def plot_histograms_from_file(histofile,
     plot_errors     : bool, optional
     If true, plot the associated errors instead of data.
     out_path        : string, optional
-    Path to save the histograms in png. 
+    Path to save the histograms in png.
     If not passed, histograms won't be saved.
     reference_histo : string, optional
     Path to a file containing the reference histograms.
