@@ -12,7 +12,7 @@ from invisible_cities.core     import system_of_units as units
 
 from invisible_cities.io  .pmaps_io                import      load_pmaps
 from invisible_cities.io  .dst_io                  import        load_dst
-from invisible_cities.reco.tbl_functions           import get_rwf_vectors
+from invisible_cities.reco.tbl_functions           import get_vectors
 from invisible_cities.reco.calib_sensors_functions import           modes
 from invisible_cities.reco.calib_functions         import      SensorType
 
@@ -289,11 +289,12 @@ def fill_rwf_histos(in_path, config_dict):
     for in_file in glob.glob(in_path):
         with tb.open_file(in_file, "r") as h5in:
             var = defaultdict(list)
-            nevt, pmtrwf, sipmrwf, _ = get_rwf_vectors(h5in)
+            pmtrwf, pmtblr, sipmrwf = get_vectors(h5in)
+            nevt = len(pmtrwf)
             for evt in range(nevt):
                 fill_rwf_var(pmtrwf [evt, :, :n_baseline], var, SensorType. PMT)
                 fill_rwf_var(sipmrwf[evt]                , var, SensorType.SIPM)
-
+                
         histo_manager.fill_histograms(var)
     return histo_manager
 
