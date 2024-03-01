@@ -230,12 +230,12 @@ def rwf_bins(config_dict):
         elif "_labels" in k: var_labels[k.replace("_labels", "")] = v
         elif "_scales" in k: var_scales[k.replace("_scales", "")] = v
 
-    n_PMTs = config_dict["n_PMTs"]
-    v      = config_dict["Raw_ADC_counts_bins"]
-    for i in range(0, int(n_PMTs)):
-        var_bins  [f"PMT{i}_ADCs"] = [np.linspace(v[0], v[1], v[2] + 1)]
-        var_labels[f"PMT{i}_ADCs"] = [f"PMT{i}_Raw_ADC_counts"]
-        var_scales[f"PMT{i}_ADCs"] = config_dict["Raw_ADC_counts_scales"]
+    #n_PMTs = config_dict["n_PMTs"]
+    #v      = config_dict["Raw_ADC_counts_bins"]
+    #for i in range(0, int(n_PMTs)):
+    #    var_bins  [f"PMT{i}_ADCs"] = [np.linspace(v[0], v[1], v[2] + 1)]
+    #    var_labels[f"PMT{i}_ADCs"] = [f"PMT{i}_Raw_ADC_counts"]
+    #    var_scales[f"PMT{i}_ADCs"] = config_dict["Raw_ADC_counts_scales"]
 
     return var_bins, var_labels, var_scales, config_dict['n_baseline']
 
@@ -265,9 +265,9 @@ def fill_rwf_var(rwfs, var_dict, sensor_type):
     var_dict[sensor_type.name + '_nSensors']   .append(len(bls))
 
     #PMT_#_ACD plots
-    if sensor_type is SensorType.PMT:
-        for i in range(0, len(rwfs)):
-            var_dict[f'PMT{i}_ADCs'].extend(rwfs[i])
+    #if sensor_type is SensorType.PMT:
+    #    for i in range(0, len(rwfs)):
+    #        var_dict[f'PMT{i}_ADCs'].extend(rwfs[i])
 
 
 def fill_rwf_histos(in_path, config_dict):
