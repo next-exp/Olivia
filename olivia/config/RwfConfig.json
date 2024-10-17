@@ -1,4 +1,4 @@
-{"PMT_Baseline_bins"  : [1950, 2550, 400],
+{"PMT_Baseline_bins"  : [1950, 3000, 1050],
  "PMT_BaselineRMS_bins"  : [0.0, 20.0, 100],
  "PMT_nSensors_bins"  : [-0.5, 60.5, 61],
  "SIPM_Baseline_bins"  : [20, 80, 100],
