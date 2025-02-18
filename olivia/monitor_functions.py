@@ -111,12 +111,13 @@ def fill_pmap_var_1d(speaks, var_dict, ptype, DataSiPM=None):
         var_dict[ptype + '_Width' ].append(speak.width / units.mus)
         var_dict[ptype + '_Height'].append(speak.height)
         var_dict[ptype + '_Energy'].append(speak.total_energy)
-        var_dict[ptype + '_Charge'].append(speak.total_charge)
+        #var_dict[ptype + '_Charge'].append(speak.total_charge)
         var_dict[ptype + '_Time'  ].append(speak.time_at_max_energy / units.mus)
 
         if ptype == 'S2':
             nS1 = var_dict['S1_Number'][-1]
             var_dict    [ptype + '_SingleS1']       .append(nS1)
+            var_dict[ptype + '_Charge'].append(speak.total_charge)
             if nS1 == 1:
                 var_dict[ptype + '_SingleS1_Energy'].append(var_dict['S1_Energy'][-1])
 
@@ -142,12 +143,13 @@ def fill_pmap_var_2d(var_dict, ptype):
     ptype    : str
     Type of pmap ('S1' or 'S2')
     """
-    param_list = ['Width', 'Height', 'Charge']
+    param_list = ['Width', 'Height']
     for param in param_list:
         var_dict[ptype + '_Energy_' + ptype + '_' + param] = np.array([var_dict[ptype + '_Energy'], var_dict[ptype + '_' + param]])
     var_dict    [ptype + '_Time_' + ptype + '_Energy']     = np.array([var_dict[ptype + '_Time']  , var_dict[ptype + '_Energy']])
 
     if ptype == 'S2':
+        param_list.append('Charge')
         sel = np.asarray(var_dict['S2_SingleS1']) == 1
         var_dict[ptype + '_Energy_S1_Energy'] = np.array([np.asarray(var_dict[ptype + '_Energy'])[sel],
                                                           np.asarray(var_dict[ptype + '_SingleS1_Energy'])])
@@ -181,6 +183,7 @@ def fill_pmap_var(pmap, sipm_db):
     del var['S2_YSiPM']
     del var['S2_SingleS1']
     del var['S2_SingleS1_Energy']
+    #del var['S1_Charge']
 
     return var
 
@@ -413,3 +416,4 @@ def fill_rwf_histos(in_path, config_dict):
 #
 #         histo_manager.fill_histograms(var)
 #     return histo_manager
+
