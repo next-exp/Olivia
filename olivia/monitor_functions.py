@@ -16,6 +16,7 @@ from invisible_cities.reco.tbl_functions           import get_vectors
 from invisible_cities.reco.calib_sensors_functions import           modes
 from invisible_cities.reco.calib_functions         import      SensorType
 
+#editing testing
 
 def pmap_bins(config_dict):
     """Generates the binning arrays, label and scale of the monitor plots
