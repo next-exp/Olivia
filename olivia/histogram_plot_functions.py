@@ -106,17 +106,36 @@ def plot_histogram(histogram,
             else:
                 mean, std = 0, 0
 
-            ax.annotate(entries_string                  +
-                        'Mean = {0:.2f}\n'.format(mean) +
-                        'RMS = {0:.2f}\n' .format(std)  +
-                        out_range_string,
-                        xy                  =    (0.99, 0.99),
-                        xycoords            = 'axes fraction',
-                        fontsize            =             11 ,
-                        weight              =          'bold',
-                        color               =         'black',
-                        horizontalalignment =         'right',
-                        verticalalignment   =           'top')
+
+            #Red text if out of range is greater than 1.7% i.e. PMT Disconnected
+            histograms_to_check = ['PMT_Baseline']
+            out_range_threshold = 1.7
+            
+            if histogram.title in histograms_to_check and get_percentage(out_range[0,0], np.sum(entries)) >= out_range_threshold:
+                ax.annotate(entries_string                  +
+                            'Mean = {0:.2f}\n'.format(mean) +
+                            'RMS = {0:.2f}\n' .format(std)  +
+                            out_range_string,
+                            xy                  =    (0.99, 0.99),
+                            xycoords            = 'axes fraction',
+                            fontsize            =             14 ,
+                            weight              =          'bold',
+                            color               =         'red',
+                            horizontalalignment =         'right',
+                            verticalalignment   =           'top')
+            else:
+                ax.annotate(entries_string                  +
+                            'Mean = {0:.2f}\n'.format(mean) +
+                            'RMS = {0:.2f}\n' .format(std)  +
+                            out_range_string,
+                            xy                  =    (0.99, 0.99),
+                            xycoords            = 'axes fraction',
+                            fontsize            =             14 ,
+                            weight              =          'bold',
+                            color               =         'black',
+                            horizontalalignment =         'right',
+                            verticalalignment   =           'top')
+
 
     elif len(bins) == 2:
         ax.pcolormesh(  bins[0],       bins[1],   entries.T)
